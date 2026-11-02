@@ -411,20 +411,45 @@ function Footer() {
 }
 
 function ReaderThemeToggle() {
-  const { active, readerMode, setReaderMode } = useTheme()
-  if (!active?.allowReaderPreference) return null
+  const { active, readerMode, setReaderMode, preferredCountry, setPreferredCountry } = useTheme()
+  if (!active?.allowReaderPreference && !active?.allowVisitorRegionSelect) return null
   const next = readerMode === 'dark' ? 'light' : readerMode === 'light' ? 'system' : 'dark'
   const label = readerMode === 'dark' ? 'Dark' : readerMode === 'light' ? 'Light' : 'System'
   return (
-    <button
-      type="button"
-      className="nav-link inline-flex items-center gap-1.5"
-      title={`Reading preference: ${label} (click to cycle)`}
-      onClick={() => setReaderMode(next)}
-    >
-      {readerMode === 'light' ? <Sun size={14} aria-hidden /> : <Moon size={14} aria-hidden />}
-      {label}
-    </button>
+    <span className="inline-flex items-center gap-2">
+      {active?.allowVisitorRegionSelect !== false && (
+        <label className="nav-link inline-flex items-center gap-1.5" title="Preferred region for festival themes">
+          <span className="sr-only">Region</span>
+          <select
+            className="bg-transparent border-0 text-inherit text-xs tracking-wide uppercase cursor-pointer outline-none"
+            value={preferredCountry}
+            onChange={(e) => setPreferredCountry(e.target.value)}
+            aria-label="Preferred festival region"
+          >
+            <option value="">Global</option>
+            <option value="IN">India</option>
+            <option value="US">USA</option>
+            <option value="GB">UK</option>
+            <option value="CN">China</option>
+            <option value="JP">Japan</option>
+            <option value="AE">UAE</option>
+            <option value="SA">Saudi</option>
+            <option value="DE">Germany</option>
+          </select>
+        </label>
+      )}
+      {active?.allowReaderPreference && (
+        <button
+          type="button"
+          className="nav-link inline-flex items-center gap-1.5"
+          title={`Reading preference: ${label} (click to cycle)`}
+          onClick={() => setReaderMode(next)}
+        >
+          {readerMode === 'light' ? <Sun size={14} aria-hidden /> : <Moon size={14} aria-hidden />}
+          {label}
+        </button>
+      )}
+    </span>
   )
 }
 

@@ -228,6 +228,59 @@ export class AdminApiService {
   rollbackTheme(historyId: string): Observable<any> {
     return this.http.post(`${this.base}/admin/themes/history/${encodeURIComponent(historyId)}/rollback`, {});
   }
+  themesStudio(): Observable<any> {
+    return this.http.get(`${this.base}/admin/themes/studio`);
+  }
+  themesCalendar(year: number, country?: string): Observable<any> {
+    const q = country ? `?year=${year}&country=${encodeURIComponent(country)}` : `?year=${year}`;
+    return this.http.get(`${this.base}/admin/themes/calendar${q}`);
+  }
+  listFestivals(params?: { country?: string }): Observable<any[]> {
+    const q = params?.country ? `?country=${encodeURIComponent(params.country)}` : '';
+    return this.http.get<any[]>(`${this.base}/admin/themes/festivals${q}`);
+  }
+  upsertFestival(body: Record<string, unknown>): Observable<any> {
+    return this.http.post(`${this.base}/admin/themes/festivals`, body);
+  }
+  listThemeTemplates(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/admin/themes/templates`);
+  }
+  getThemeTemplate(id: string): Observable<any> {
+    return this.http.get(`${this.base}/admin/themes/templates/${encodeURIComponent(id)}`);
+  }
+  createThemeTemplate(body: Record<string, unknown>): Observable<any> {
+    return this.http.post(`${this.base}/admin/themes/templates`, body);
+  }
+  updateThemeTemplate(id: string, body: Record<string, unknown>): Observable<any> {
+    return this.http.patch(`${this.base}/admin/themes/templates/${encodeURIComponent(id)}`, body);
+  }
+  publishThemeTemplate(id: string, publishSlug?: string): Observable<any> {
+    return this.http.post(`${this.base}/admin/themes/templates/${encodeURIComponent(id)}/publish`, {
+      publishSlug,
+    });
+  }
+  duplicateThemeTemplate(id: string): Observable<any> {
+    return this.http.post(`${this.base}/admin/themes/templates/${encodeURIComponent(id)}/duplicate`, {});
+  }
+  restoreThemeTemplateVersion(id: string, versionId: string): Observable<any> {
+    return this.http.post(
+      `${this.base}/admin/themes/templates/${encodeURIComponent(id)}/versions/${encodeURIComponent(versionId)}/restore`,
+      {},
+    );
+  }
+  archiveThemeTemplate(id: string): Observable<any> {
+    return this.http.post(`${this.base}/admin/themes/templates/${encodeURIComponent(id)}/archive`, {});
+  }
+  listThemeAssets(category?: string): Observable<any[]> {
+    const q = category ? `?category=${encodeURIComponent(category)}` : '';
+    return this.http.get<any[]>(`${this.base}/admin/themes/assets${q}`);
+  }
+  listThemeAnimations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/admin/themes/animations`);
+  }
+  setScheduleStatus(id: string, status: string): Observable<any> {
+    return this.http.patch(`${this.base}/admin/themes/schedules/${encodeURIComponent(id)}/status`, { status });
+  }
 
   // Managed pages / announcements
   listManagedPages(): Observable<any[]> {

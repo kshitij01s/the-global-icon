@@ -63,6 +63,7 @@ const NAV: NavGroup[] = [
     title: 'Appearance & Themes',
     items: [
       { label: 'Theme Overview', path: '/themes', icon: '◐', access: ACCESS.themes },
+      { label: 'Festival Theme Studio', path: '/theme-studio', icon: '✦', access: ACCESS.themes },
       { label: 'Website Settings', path: '/settings', icon: '⚙', access: ACCESS.settings },
     ],
   },

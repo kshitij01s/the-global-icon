@@ -100,6 +100,14 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/themes.component').then((m) => m.ThemesComponent),
       },
       {
+        path: 'theme-studio',
+        title: 'Festival Theme Studio · TGI Admin',
+        canActivate: [accessGuard],
+        data: { access: ACCESS.themes },
+        loadComponent: () =>
+          import('./pages/theme-studio.component').then((m) => m.ThemeStudioComponent),
+      },
+      {
         path: 'pages',
         pathMatch: 'full',
         redirectTo: 'pages/home',

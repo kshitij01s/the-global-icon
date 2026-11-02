@@ -9,8 +9,10 @@ A premium digital magazine publishing platform with editorial management, magazi
 - Public React magazine site (editions, stories, leaders, PDF reader)
 - Angular Admin / Super Admin console with RBAC
 - NestJS API + PostgreSQL (Prisma)
-- Global theme library (21 themes) with festival scheduling
-- Christmas and other festival visual treatments (effects off on `/read`)
+- Global theme library (30+ built-in themes) with festival scheduling
+- **Festival Theme Studio** (Figma-style admin editor): templates, calendar, assets, animations
+- Worldwide festival catalog with regional schedules and visitor region preference
+- Festival visual treatments (effects off on `/read`; reduced-motion safe)
 - Webpage Page Editor (draft / publish / restore)
 - Contact, newsletter, RSS, advertising enquiry workflows
 - Legacy Django application preserved until cutover
@@ -79,6 +81,16 @@ Theme/page smoke (API must be running):
 ```powershell
 node apps/api/scripts/verify-theme-editor.js
 ```
+
+### Festival Theme Studio docs
+
+- [docs/GLOBAL_FESTIVAL_THEME_IMPLEMENTATION_PLAN.md](docs/GLOBAL_FESTIVAL_THEME_IMPLEMENTATION_PLAN.md)
+- [docs/FESTIVAL_THEME_SYSTEM.md](docs/FESTIVAL_THEME_SYSTEM.md)
+- [docs/THEME_STUDIO_GUIDE.md](docs/THEME_STUDIO_GUIDE.md)
+- [docs/FESTIVAL_SCHEDULER.md](docs/FESTIVAL_SCHEDULER.md)
+- [docs/GLOBAL_FESTIVAL_CALENDAR.md](docs/GLOBAL_FESTIVAL_CALENDAR.md)
+
+Admin: `http://localhost:4200/theme-studio`
 
 ## Documentation
 

@@ -21,7 +21,16 @@ export type ThemeEffects = {
   hearts?: boolean
   fireworks?: boolean
   natureLeaves?: boolean
+  lanterns?: boolean
+  fog?: boolean
+  petals?: boolean
+  confetti?: boolean
+  crescentGlow?: boolean
+  pumpkins?: boolean
   intensity?: 'subtle' | 'medium'
+  speed?: number
+  opacity?: number
+  quantity?: number
 }
 
 export type ActiveTheme = {
@@ -35,6 +44,7 @@ export type ActiveTheme = {
   effectsEnabled: boolean
   allowReaderPreference: boolean
   allowAdminGlobalChange: boolean
+  allowVisitorRegionSelect?: boolean
   schedule: {
     id: string
     eventKey: string
@@ -43,9 +53,13 @@ export type ActiveTheme = {
     endsAt: string
     priority: number
     timezone: string
+    countryCode?: string | null
+    regionCode?: string | null
   } | null
   priorityRules: string[]
   serverTime: string
+  effectiveTime?: string
+  region?: { countryCode?: string; regionCode?: string }
 }
 
 type ReaderMode = 'light' | 'dark' | 'system'
@@ -55,11 +69,14 @@ type ThemeContextValue = {
   loading: boolean
   readerMode: ReaderMode
   setReaderMode: (mode: ReaderMode) => void
+  preferredCountry: string
+  setPreferredCountry: (code: string) => void
   refresh: () => Promise<void>
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 const STORAGE_KEY = 'tgi-reader-mode'
+const REGION_KEY = 'tgi-preferred-country'
 
 function applyTokens(tokens: ThemeTokens) {
   const root = document.documentElement
@@ -82,7 +99,6 @@ function applyReaderMode(mode: ReaderMode, allowed: boolean, themeMode: string |
   if (mode === 'system') {
     resolved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
   }
-  // Reader preference remaps reading surfaces without wiping brand tokens entirely.
   if (resolved === 'light' && themeMode !== 'light') {
     root.style.setProperty('--color-paper', '#fcfaf5')
     root.style.setProperty('--color-ivory', '#1a1d24')
@@ -103,10 +119,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem(STORAGE_KEY) as ReaderMode | null
     return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system'
   })
+  const [preferredCountry, setPreferredCountryState] = useState(() => {
+    return localStorage.getItem(REGION_KEY) || ''
+  })
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/themes/active`, { credentials: 'include' })
+      const qs = preferredCountry ? `?country=${encodeURIComponent(preferredCountry)}` : ''
+      const res = await fetch(`${API_BASE}/themes/active${qs}`, { credentials: 'include' })
       if (!res.ok) throw new Error('theme fetch failed')
       const data = (await res.json()) as ActiveTheme
       setActive(data)
@@ -115,29 +135,47 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       document.documentElement.dataset.themeSource = data.source
       applyReaderMode(readerMode, data.allowReaderPreference, data.tokens['theme-mode'])
     } catch {
-      // Fallback: keep CSS defaults from index.css
       setActive(null)
     } finally {
       setLoading(false)
     }
-  }, [readerMode])
+  }, [readerMode, preferredCountry])
 
   useEffect(() => {
     void refresh()
+    const id = window.setInterval(() => void refresh(), 60_000)
+    return () => window.clearInterval(id)
   }, [refresh])
 
   const setReaderMode = useCallback(
     (mode: ReaderMode) => {
       setReaderModeState(mode)
       localStorage.setItem(STORAGE_KEY, mode)
-      if (active) applyReaderMode(mode, active.allowReaderPreference, active.tokens['theme-mode'])
+      if (active) {
+        applyReaderMode(mode, active.allowReaderPreference, active.tokens['theme-mode'])
+      }
     },
     [active],
   )
 
+  const setPreferredCountry = useCallback((code: string) => {
+    const next = code.toUpperCase()
+    setPreferredCountryState(next)
+    if (next) localStorage.setItem(REGION_KEY, next)
+    else localStorage.removeItem(REGION_KEY)
+  }, [])
+
   const value = useMemo(
-    () => ({ active, loading, readerMode, setReaderMode, refresh }),
-    [active, loading, readerMode, setReaderMode, refresh],
+    () => ({
+      active,
+      loading,
+      readerMode,
+      setReaderMode,
+      preferredCountry,
+      setPreferredCountry,
+      refresh,
+    }),
+    [active, loading, readerMode, setReaderMode, preferredCountry, setPreferredCountry, refresh],
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

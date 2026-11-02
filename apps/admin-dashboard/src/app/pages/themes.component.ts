@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../core/admin-api.service';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../core/toast.service';
@@ -8,15 +9,16 @@ import { errorMessage } from '../core/util';
 
 @Component({
   selector: 'app-themes',
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, RouterLink],
   template: `
     <header class="page-head">
       <div>
         <h1>Appearance &amp; Themes</h1>
         <p class="muted">
-          Priority: manual override → scheduled festival → global default → reader preference (client).
+          Priority: manual override → regional festival → global festival → global default → reader preference.
         </p>
       </div>
+      <a class="btn" routerLink="/theme-studio">Open Festival Theme Studio</a>
     </header>
 
     @if (error()) {

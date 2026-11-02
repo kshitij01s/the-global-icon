@@ -936,10 +936,78 @@
   height: 80px;
   background: linear-gradient(0deg, rgba(22, 101, 52, 0.2), transparent);
 }
+.festival-lanterns {
+  position: absolute;
+  top: 1.5rem;
+  left: 8%;
+  right: 8%;
+  height: 36px;
+  background:
+    radial-gradient(ellipse at 15% 50%, rgba(220, 38, 38, 0.45), transparent 40%),
+    radial-gradient(ellipse at 50% 50%, rgba(245, 158, 11, 0.4), transparent 40%),
+    radial-gradient(ellipse at 85% 50%, rgba(220, 38, 38, 0.45), transparent 40%);
+  opacity: 0.55;
+}
+.festival-fog {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 35%;
+  background: linear-gradient(0deg, rgba(88, 28, 135, 0.22), transparent);
+  filter: blur(2px);
+}
+.festival-petals {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(244, 114, 182, 0.2) 0 3px, transparent 4px),
+    radial-gradient(circle at 72% 30%, rgba(251, 113, 133, 0.18) 0 2px, transparent 3px),
+    radial-gradient(circle at 40% 70%, rgba(249, 168, 212, 0.16) 0 3px, transparent 4px);
+  animation: festival-petals 14s linear infinite;
+  opacity: 0.7;
+}
+@keyframes festival-petals {
+  to {
+    transform: translateY(12px);
+  }
+}
+.festival-confetti {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, transparent 48%, rgba(227, 201, 151, 0.25) 49% 51%, transparent 52%) 10% 20% / 12px 12px,
+    linear-gradient(-20deg, transparent 48%, rgba(248, 113, 113, 0.2) 49% 51%, transparent 52%) 70% 15% / 10px 10px;
+  opacity: 0.45;
+}
+.festival-crescent {
+  position: absolute;
+  top: 12%;
+  right: 8%;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  box-shadow: inset -10px 0 0 0 rgba(197, 165, 114, 0.45);
+  opacity: 0.65;
+}
+.festival-pumpkin {
+  position: absolute;
+  bottom: 1.25rem;
+  right: 1.5rem;
+  width: 36px;
+  height: 28px;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(circle at 50% 40%, #f97316, #9a3412);
+  opacity: 0.55;
+}
+.festival-medium .festival-lights,
+.festival-medium .festival-diya,
+.festival-medium .festival-holi {
+  opacity: 0.9;
+}
 @media (prefers-reduced-motion: reduce) {
   .festival-flake,
   .festival-lights,
-  .festival-spark {
+  .festival-spark,
+  .festival-petals {
     animation: none !important;
   }
   .festival-layer {
