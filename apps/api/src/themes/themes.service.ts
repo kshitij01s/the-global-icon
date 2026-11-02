@@ -8,18 +8,23 @@ import type { Prisma } from '@prisma/client';
 import { writeAudit } from '../common/audit';
 import type { AuthUser } from '../common/types';
 import { PrismaService } from '../prisma/prisma.service';
+import { FestivalStudioService } from './festival-studio.service';
 import { catalogBySlug, THEME_CATALOG, type ThemeEffects, type ThemeTokens } from './theme-catalog';
 
 /**
  * Priority (highest first):
  * 1. Super Admin manual override (while active)
- * 2. Enabled scheduled festival (highest priority, then latest start)
- * 3. Configured global default theme
- * 4. Reader preference is applied client-side only when allowReaderPreference
+ * 2. Active scheduled regional festival (matching country/region)
+ * 3. Active scheduled global festival
+ * 4. Configured global default theme
+ * 5. Reader preference is applied client-side only when allowReaderPreference
  */
 @Injectable()
 export class ThemesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly studio: FestivalStudioService,
+  ) {}
 
   async ensureSeeded() {
     const count = await this.prisma.themeDefinition.count();
@@ -57,6 +62,7 @@ export class ThemesService {
             timezone: 'UTC',
             priority: 100,
             enabled: true,
+            status: 'SCHEDULED',
             restoreThemeSlug: 'midnight-dark',
           },
           {
@@ -68,6 +74,7 @@ export class ThemesService {
             timezone: 'UTC',
             priority: 90,
             enabled: true,
+            status: 'SCHEDULED',
             restoreThemeSlug: 'midnight-dark',
           },
           {
@@ -79,11 +86,14 @@ export class ThemesService {
             timezone: 'Asia/Kolkata',
             priority: 80,
             enabled: false,
+            status: 'DRAFT',
+            countryCode: 'IN',
             restoreThemeSlug: 'midnight-dark',
           },
         ],
       });
     }
+    await this.studio.ensureFestivalSeeded();
   }
 
   async listLibrary() {
@@ -96,21 +106,24 @@ export class ThemesService {
     return this.prisma.appearanceSettings.findUniqueOrThrow({ where: { id: 1 } });
   }
 
-  async resolveActive(now = new Date()) {
+  async resolveActive(now = new Date(), opts: { countryCode?: string; regionCode?: string } = {}) {
     await this.ensureSeeded();
     const settings = await this.getAppearance();
+    // Super Admin scheduler test mode: simulate "now" without publishing to real visitors unless override is set.
+    // Public clients never receive test-mode activation unless they pass ?test=1 AND testAsOf is set — still read-only resolve.
+    const effectiveNow = settings.schedulerTestAsOf ?? now;
     let source: 'manual_override' | 'festival' | 'global' = 'global';
     let slug = settings.globalThemeSlug;
     let schedule: Awaited<ReturnType<ThemesService['findActiveFestival']>> | null = null;
 
     if (
       settings.manualOverrideSlug &&
-      (!settings.manualOverrideUntil || settings.manualOverrideUntil > now)
+      (!settings.manualOverrideUntil || settings.manualOverrideUntil > effectiveNow)
     ) {
       slug = settings.manualOverrideSlug;
       source = 'manual_override';
     } else if (settings.festivalAutoEnabled) {
-      schedule = await this.findActiveFestival(now);
+      schedule = await this.findActiveFestival(effectiveNow, opts.countryCode, opts.regionCode);
       if (schedule) {
         slug = schedule.themeSlug;
         source = 'festival';
@@ -144,19 +157,24 @@ export class ThemesService {
         effectsEnabled: settings.effectsEnabled,
         allowReaderPreference: settings.allowReaderPreference,
         allowAdminGlobalChange: settings.allowAdminGlobalChange,
+        allowVisitorRegionSelect: settings.allowVisitorRegionSelect,
         schedule: null,
         settings: {
           globalThemeSlug: settings.globalThemeSlug,
           festivalAutoEnabled: settings.festivalAutoEnabled,
           manualOverrideSlug: settings.manualOverrideSlug,
+          schedulerTestAsOf: settings.schedulerTestAsOf?.toISOString() ?? null,
         },
         priorityRules: [
           '1. Super Admin emergency/manual override',
-          '2. Active scheduled festival theme',
-          '3. Configured global default theme',
-          '4. Reader light/dark preference (client, when permitted)',
+          '2. Active scheduled regional festival theme',
+          '3. Active scheduled global festival theme',
+          '4. Configured global default theme',
+          '5. Reader light/dark preference (client, when permitted)',
         ],
         serverTime: now.toISOString(),
+        effectiveTime: effectiveNow.toISOString(),
+        region: opts,
       };
     }
 
@@ -176,10 +194,11 @@ export class ThemesService {
       kind: theme.kind,
       festivalKey: theme.festivalKey,
       tokens: theme.tokens as ThemeTokens,
-      effects: source === 'festival' ? effects : null,
+      effects,
       effectsEnabled: settings.effectsEnabled,
       allowReaderPreference: settings.allowReaderPreference,
       allowAdminGlobalChange: settings.allowAdminGlobalChange,
+      allowVisitorRegionSelect: settings.allowVisitorRegionSelect,
       schedule: schedule
         ? {
             id: schedule.id,
@@ -189,30 +208,67 @@ export class ThemesService {
             endsAt: schedule.endsAt.toISOString(),
             priority: schedule.priority,
             timezone: schedule.timezone,
+            countryCode: schedule.countryCode,
+            regionCode: schedule.regionCode,
+            status: schedule.status,
           }
         : null,
       settings: {
         globalThemeSlug: settings.globalThemeSlug,
         festivalAutoEnabled: settings.festivalAutoEnabled,
         manualOverrideSlug: settings.manualOverrideSlug,
+        schedulerTestAsOf: settings.schedulerTestAsOf?.toISOString() ?? null,
       },
       priorityRules: [
         '1. Super Admin emergency/manual override',
-        '2. Active scheduled festival theme',
-        '3. Configured global default theme',
-        '4. Reader light/dark preference (client, when permitted)',
+        '2. Active scheduled regional festival theme',
+        '3. Active scheduled global festival theme',
+        '4. Configured global default theme',
+        '5. Reader light/dark preference (client, when permitted)',
       ],
       serverTime: now.toISOString(),
+      effectiveTime: effectiveNow.toISOString(),
+      region: opts,
     };
   }
 
-  private async findActiveFestival(now: Date) {
+  private async findActiveFestival(now: Date, countryCode?: string, regionCode?: string) {
     const rows = await this.prisma.festivalSchedule.findMany({
-      where: { enabled: true, startsAt: { lte: now }, endsAt: { gte: now } },
+      where: {
+        enabled: true,
+        status: { in: ['SCHEDULED', 'ACTIVE'] },
+        startsAt: { lte: now },
+        endsAt: { gte: now },
+      },
       orderBy: [{ priority: 'desc' }, { startsAt: 'desc' }],
-      take: 1,
     });
-    return rows[0] ?? null;
+
+    // Prefer region match, then country, then global (null country)
+    const scored = rows
+      .map((r) => {
+        let score = 0;
+        if (regionCode && r.regionCode && r.regionCode === regionCode) score += 100;
+        if (countryCode && r.countryCode && r.countryCode === countryCode) score += 50;
+        if (!r.countryCode && !r.regionCode) score += 10; // global festival
+        // If schedule is country-locked and visitor has different country, skip
+        if (r.countryCode && countryCode && r.countryCode !== countryCode) score = -1;
+        if (r.regionCode && regionCode && r.regionCode !== regionCode && r.countryCode === countryCode) {
+          // region-specific schedule: only apply when region matches (or visitor has no region)
+          if (regionCode && r.regionCode !== regionCode) score = -1;
+        }
+        return { r, score };
+      })
+      .filter((x) => x.score >= 0)
+      .sort((a, b) => b.score - a.score || b.r.priority - a.r.priority);
+
+    const best = scored[0]?.r ?? null;
+    if (best && best.status === 'SCHEDULED') {
+      // Mark ACTIVE for audit trail (idempotent)
+      await this.prisma.festivalSchedule
+        .update({ where: { id: best.id }, data: { status: 'ACTIVE' } })
+        .catch(() => null);
+    }
+    return best;
   }
 
   async listSchedules() {
@@ -305,14 +361,20 @@ export class ThemesService {
       effectsEnabled: boolean;
       allowAdminGlobalChange: boolean;
       allowReaderPreference: boolean;
+      allowVisitorRegionSelect: boolean;
       defaultRestoreSlug: string;
+      schedulerTestAsOf: string | null;
     }>,
   ) {
     await this.ensureSeeded();
+    const { schedulerTestAsOf, ...rest } = body;
     const updated = await this.prisma.appearanceSettings.update({
       where: { id: 1 },
       data: {
-        ...body,
+        ...rest,
+        ...(schedulerTestAsOf !== undefined
+          ? { schedulerTestAsOf: schedulerTestAsOf ? new Date(schedulerTestAsOf) : null }
+          : {}),
         updatedById: actor.id,
       },
     });
@@ -339,6 +401,10 @@ export class ThemesService {
       timezone?: string;
       priority?: number;
       enabled?: boolean;
+      status?: string;
+      countryCode?: string | null;
+      regionCode?: string | null;
+      festivalId?: string | null;
       restoreThemeSlug?: string | null;
     },
   ) {
@@ -358,6 +424,10 @@ export class ThemesService {
       timezone: body.timezone ?? 'UTC',
       priority: body.priority ?? 10,
       enabled: body.enabled ?? true,
+      status: body.status ?? (body.enabled === false ? 'PAUSED' : 'SCHEDULED'),
+      countryCode: body.countryCode ?? null,
+      regionCode: body.regionCode ?? null,
+      festivalId: body.festivalId ?? null,
       restoreThemeSlug: body.restoreThemeSlug ?? 'midnight-dark',
     };
 
@@ -368,7 +438,22 @@ export class ThemesService {
     await this.recordHistory(actor, null, body.themeSlug, 'SCHEDULE_UPSERT', {
       scheduleId: row.id,
       eventKey: row.eventKey,
+      countryCode: row.countryCode,
     });
+    return row;
+  }
+
+  async setScheduleStatus(actor: AuthUser, id: string, status: string) {
+    const allowed = ['DRAFT', 'SCHEDULED', 'ACTIVE', 'PAUSED', 'EXPIRED', 'CANCELLED'];
+    if (!allowed.includes(status)) throw new BadRequestException('Invalid status');
+    const row = await this.prisma.festivalSchedule.update({
+      where: { id },
+      data: {
+        status,
+        enabled: status === 'SCHEDULED' || status === 'ACTIVE',
+      },
+    });
+    await this.recordHistory(actor, null, row.themeSlug, 'SCHEDULE_STATUS', { id, status });
     return row;
   }
 

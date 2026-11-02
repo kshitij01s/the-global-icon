@@ -590,17 +590,20 @@ model ThemeDefinition {
 
 /// Singleton (id=1) controlling global appearance resolution.
 model AppearanceSettings {
-  id                     Int       @id @default(1)
-  globalThemeSlug        String    @default("midnight-dark")
-  manualOverrideSlug     String?
-  manualOverrideUntil    DateTime?
-  festivalAutoEnabled    Boolean   @default(true)
-  effectsEnabled         Boolean   @default(true)
-  allowAdminGlobalChange Boolean   @default(false)
-  allowReaderPreference  Boolean   @default(true)
-  defaultRestoreSlug     String    @default("midnight-dark")
-  updatedAt              DateTime  @updatedAt
-  updatedById            String?
+  id                       Int       @id @default(1)
+  globalThemeSlug          String    @default("midnight-dark")
+  manualOverrideSlug       String?
+  manualOverrideUntil      DateTime?
+  festivalAutoEnabled      Boolean   @default(true)
+  effectsEnabled           Boolean   @default(true)
+  allowAdminGlobalChange   Boolean   @default(false)
+  allowReaderPreference    Boolean   @default(true)
+  allowVisitorRegionSelect Boolean   @default(true)
+  defaultRestoreSlug       String    @default("midnight-dark")
+  /// Super Admin only: when set, resolveActive uses this instant (ISO) for schedule tests. Never auto-publishes.
+  schedulerTestAsOf        DateTime?
+  updatedAt                DateTime  @updatedAt
+  updatedById              String?
 }
 
 model FestivalSchedule {
@@ -613,13 +616,122 @@ model FestivalSchedule {
   timezone         String   @default("UTC")
   priority         Int      @default(10)
   enabled          Boolean  @default(true)
+  status           String   @default("SCHEDULED") // DRAFT | SCHEDULED | ACTIVE | PAUSED | EXPIRED | CANCELLED
+  countryCode      String?
+  regionCode       String?
+  festivalId       String?
   regions          Json?
   restoreThemeSlug String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  festival         Festival? @relation(fields: [festivalId], references: [id], onDelete: SetNull)
 
   @@index([enabled, startsAt, endsAt])
   @@index([priority])
+  @@index([countryCode, enabled])
+  @@index([status])
+}
+
+/// Worldwide festival catalog (dates verified by admin for movable lunar events).
+model Festival {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  name               String
+  description        String?
+  countryCode        String
+  regionCode         String?
+  continent          String?
+  culturalCategory   String?
+  timezone           String   @default("UTC")
+  calendarBasis      String   @default("GREGORIAN") // GREGORIAN | LUNAR | HYBRID
+  dateSource         String?
+  dateVerified       Boolean  @default(false)
+  defaultThemeSlug   String?
+  heroImageKey       String?
+  isActive           Boolean  @default(true)
+  priority           Int      @default(10)
+  sampleStartMonth   Int?
+  sampleStartDay     Int?
+  sampleEndMonth     Int?
+  sampleEndDay       Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  schedules          FestivalSchedule[]
+  templates          ThemeTemplate[]
+
+  @@index([countryCode, isActive])
+  @@index([culturalCategory])
+}
+
+/// Editable studio template (draft/publish) that compiles into ThemeDefinition tokens.
+model ThemeTemplate {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  description    String?
+  status         String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  festivalId     String?
+  countryCode    String?
+  regionCode     String?
+  baseThemeSlug  String?
+  publishedSlug  String?
+  tokens         Json
+  effects        Json?
+  layout         Json?
+  createdById    String?
+  updatedById    String?
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  festival       Festival? @relation(fields: [festivalId], references: [id], onDelete: SetNull)
+  versions       ThemeTemplateVersion[]
+
+  @@index([status, updatedAt])
+  @@index([festivalId])
+}
+
+model ThemeTemplateVersion {
+  id          String   @id @default(cuid())
+  templateId  String
+  note        String?
+  tokens      Json
+  effects     Json?
+  layout      Json?
+  createdById String?
+  createdAt   DateTime @default(now())
+  template    ThemeTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@index([templateId, createdAt])
+}
+
+model ThemeAsset {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  name         String
+  category     String
+  festivalKey  String?
+  countryCode  String?
+  mimeType     String?
+  urlOrPath    String
+  meta         Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([category, isActive])
+  @@index([festivalKey])
+}
+
+model AnimationPreset {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  config      Json
+  festivalKey String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model ThemeHistory {

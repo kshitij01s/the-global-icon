@@ -11,7 +11,16 @@ export type ThemeEffects = {
   hearts?: boolean;
   fireworks?: boolean;
   natureLeaves?: boolean;
+  lanterns?: boolean;
+  fog?: boolean;
+  petals?: boolean;
+  confetti?: boolean;
+  crescentGlow?: boolean;
+  pumpkins?: boolean;
   intensity?: 'subtle' | 'medium';
+  speed?: number;
+  opacity?: number;
+  quantity?: number;
 };
 
 export type CatalogTheme = {
@@ -302,7 +311,143 @@ export const THEME_CATALOG: CatalogTheme[] = [
       'color-navy': '#3b0a0a',
       'color-crimson': '#dc2626',
     },
+    effects: { festiveLights: true, lanterns: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-thanksgiving',
+    name: 'Thanksgiving',
+    description: 'Warm harvest amber and deep brown.',
+    kind: 'FESTIVAL',
+    festivalKey: 'thanksgiving',
+    tokens: {
+      ...baseDark('#d97706', '#fbbf24', '#1a1008'),
+      'color-navy': '#2a1c10',
+      'color-ivory': '#fff7ed',
+    },
+    effects: { natureLeaves: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-july-4',
+    name: 'Independence Day (USA)',
+    description: 'Navy, ivory, and restrained crimson accents.',
+    kind: 'FESTIVAL',
+    festivalKey: 'july-4',
+    tokens: {
+      ...baseDark('#93c5fd', '#dbeafe', '#060b18'),
+      'color-navy': '#0c1a36',
+      'color-crimson': '#b91c1c',
+      'color-gold': '#f8fafc',
+    },
+    effects: { fireworks: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-ramadan',
+    name: 'Ramadan',
+    description: 'Deep emerald, midnight blue, and soft gold.',
+    kind: 'FESTIVAL',
+    festivalKey: 'ramadan',
+    tokens: {
+      ...baseDark('#c5a572', '#e8d5a3', '#061018'),
+      'color-navy': '#0c2430',
+      'color-gold': '#c9a227',
+    },
+    effects: { crescentGlow: true, festiveLights: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-sakura',
+    name: 'Sakura Season',
+    description: 'Soft blossom pinks and charcoal ink.',
+    kind: 'FESTIVAL',
+    festivalKey: 'sakura',
+    tokens: {
+      ...baseLight('#db2777', '#f9a8d4'),
+      'color-midnight': '#fff5f8',
+      'color-navy': '#fce7f3',
+    },
+    effects: { petals: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-st-patrick',
+    name: "St Patrick's Day",
+    description: 'Emerald greens with soft gold.',
+    kind: 'FESTIVAL',
+    festivalKey: 'st-patrick',
+    tokens: {
+      ...baseDark('#22c55e', '#86efac', '#06140c'),
+      'color-navy': '#0d2a18',
+      'color-gold': '#c9a227',
+    },
+  },
+  {
+    slug: 'festival-oktoberfest',
+    name: 'Oktoberfest',
+    description: 'Warm Bavarian amber and deep blue.',
+    kind: 'FESTIVAL',
+    festivalKey: 'oktoberfest',
+    tokens: {
+      ...baseDark('#f59e0b', '#fde68a', '#0c1220'),
+      'color-navy': '#1e3a5f',
+    },
+  },
+  {
+    slug: 'festival-republic-day-in',
+    name: 'Republic Day (India)',
+    description: 'Tricolour-inspired restrained accents.',
+    kind: 'FESTIVAL',
+    festivalKey: 'republic-day-in',
+    tokens: {
+      ...baseDark('#ff9933', '#ffcc80', '#0a120e'),
+      'color-navy': '#0f2a1a',
+      'color-crimson': '#ff671f',
+      'color-gold': '#138808',
+    },
+  },
+  {
+    slug: 'festival-ganesh',
+    name: 'Ganesh Chaturthi',
+    description: 'Saffron, marigold, and deep indigo.',
+    kind: 'FESTIVAL',
+    festivalKey: 'ganesh',
+    tokens: {
+      ...baseDark('#f59e0b', '#fbbf24', '#120a18'),
+      'color-navy': '#2a1840',
+      'color-crimson': '#ea580c',
+    },
     effects: { festiveLights: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'festival-navratri',
+    name: 'Navratri',
+    description: 'Jewel tones and celebratory gold.',
+    kind: 'FESTIVAL',
+    festivalKey: 'navratri',
+    tokens: {
+      ...baseDark('#eab308', '#fde047', '#140818'),
+      'color-navy': '#2d1040',
+      'color-crimson': '#c026d3',
+    },
+    effects: { colourBurst: true, intensity: 'subtle' },
+  },
+  {
+    slug: 'editorial-ivory',
+    name: 'Editorial Ivory',
+    description: 'Premium light editorial paper tones.',
+    kind: 'LIBRARY',
+    tokens: baseLight('#9c7c47', '#c5a572'),
+  },
+  {
+    slug: 'luxury-black',
+    name: 'Luxury Black',
+    description: 'Near-black surfaces with champagne accents.',
+    kind: 'LIBRARY',
+    tokens: { ...baseDark('#d4af37', '#f0d78c', '#050505'), 'color-navy': '#111111' },
+  },
+  {
+    slug: 'premium-gold',
+    name: 'Premium Gold',
+    description: 'Gold-forward luxury magazine look.',
+    kind: 'LIBRARY',
+    tokens: { ...baseDark('#d4af37', '#ffe6a3', '#0c0a06'), 'color-navy': '#1a1508' },
   },
 ];
 

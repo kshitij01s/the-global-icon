@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ThemesService } from './themes.service';
 
@@ -7,10 +7,16 @@ import { ThemesService } from './themes.service';
 export class ThemesController {
   constructor(private readonly themes: ThemesService) {}
 
-  /** Public: resolved active theme for the whole site (server clock). */
+  /** Public: resolved active theme (server clock; optional region). */
   @Get('active')
-  active() {
-    return this.themes.resolveActive();
+  active(
+    @Query('country') countryCode?: string,
+    @Query('region') regionCode?: string,
+  ) {
+    return this.themes.resolveActive(new Date(), {
+      countryCode: countryCode?.toUpperCase(),
+      regionCode: regionCode?.toUpperCase(),
+    });
   }
 
   @Get()
