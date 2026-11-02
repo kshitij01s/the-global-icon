@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Manage editions — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Management · Editions</p><h1>Magazine<br><em>workflow.</em></h1><p>Review and publish editions according to your assigned permissions.</p></section>
+<section class="section shell management-shell">
+  <div class="section-heading"><div><p class="eyebrow">{{ page.paginator.count }} editions</p><h2>All editions</h2></div>{% if can_upload %}<a class="button button-dark" href="{% url 'management_magazine_upload' %}">Submit an edition ↗</a>{% endif %}</div>
+  <form class="catalog-filters management-filters" method="get">
+    <label>Search editions<input type="search" name="q" value="{{ query }}" placeholder="Title or identifier"></label>
+    <label>Status<select name="status"><option value="">All statuses</option><option value="published" {% if selected_status == "published" %}selected{% endif %}>Published</option>{% for value,label in statuses %}<option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <div class="filter-actions"><button class="button button-dark" type="submit">Filter</button><a class="text-link" href="{% url 'management_magazines' %}">Clear</a></div>
+  </form>
+  <div class="management-table-wrap"><table class="management-table"><thead><tr><th>Edition</th><th>Workflow</th><th>Submitted</th><th>Files</th><th>Actions</th></tr></thead><tbody>
+    {% for magazine in page %}<tr>
+      <td><strong>{{ magazine.title }}</strong><small>{% if magazine.edition %}{{ magazine.edition.name }} · {% endif %}{{ magazine.publication_date|date:"M j, Y" }}</small></td>
+      <td><span class="status-badge {% if magazine.is_published %}status-published{% else %}status-{{ magazine.review_status }}{% endif %}">{% if magazine.is_published %}Published{% else %}{{ magazine.get_review_status_display }}{% endif %}</span></td>
+      <td>{{ magazine.submitted_by|default:"—" }}{% if magazine.submitted_at %}<small>{{ magazine.submitted_at|date:"M j, Y" }}</small>{% endif %}</td>
+      <td>{% if magazine.has_cover %}<span>Cover</span>{% endif %}{% if magazine.has_pdf %}<span>PDF</span>{% else %}<span class="muted">No PDF</span>{% endif %}</td>
+      <td><div class="management-row-actions">
+        {% if can_change %}<a href="{% url 'admin:publications_magazine_change' magazine.pk %}">Edit</a>{% endif %}
+        {% if can_change and not magazine.is_published %}
+          {% if magazine.review_status == "draft" or magazine.review_status == "changes_requested" %}
+            <form method="post" action="{% url 'management_magazine_submit' magazine.pk %}">{% csrf_token %}<button type="submit">Submit for review</button></form>
+          {% endif %}
+        {% endif %}
+        {% if can_approve and not magazine.is_published and magazine.review_status == "in_review" %}
+          <form method="post" action="{% url 'management_magazine_review' magazine.pk 'approve' %}">{% csrf_token %}<button type="submit">Approve</button></form>
+          <form method="post" action="{% url 'management_magazine_review' magazine.pk 'request-changes' %}">{% csrf_token %}<button type="submit">Request changes</button></form>
+        {% endif %}
+        {% if can_publish and not magazine.is_published and magazine.review_status == "approved" %}
+          {% if magazine.has_pdf %}<form method="post" action="{% url 'management_magazine_publish' magazine.pk 'publish' %}">{% csrf_token %}<button type="submit">Publish</button></form>{% else %}<span class="muted">PDF required</span>{% endif %}
+        {% endif %}
+        {% if can_publish and magazine.is_published %}<form method="post" action="{% url 'management_magazine_publish' magazine.pk 'unpublish' %}">{% csrf_token %}<button type="submit">Unpublish</button></form>{% endif %}
+        {% if can_publish and magazine.review_status != "archived" %}<form method="post" action="{% url 'management_magazine_publish' magazine.pk 'archive' %}" onsubmit="return confirm('Archive this edition? It will no longer appear publicly.');">{% csrf_token %}<button type="submit">Archive</button></form>{% endif %}
+      </div></td>
+    </tr>{% empty %}<tr><td colspan="5"><div class="empty-state"><p>No editions match these filters.</p><span>Try another search or clear the selected status.</span></div></td></tr>{% endfor %}
+  </tbody></table></div>
+  {% include "publications/pagination.html" with page=page filter_query=filter_query %}
+</section>
+{% endblock %}

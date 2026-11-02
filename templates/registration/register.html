@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Create a reader account — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell login-panel"><p class="eyebrow">Reader account</p><h1>Make a little<br><em>room to read.</em></h1><p>Reader accounts can save editions and track private reading progress. Creating an account does not grant staff or subscriber access.</p>
+  <form method="post" class="login-form">{% csrf_token %}{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<p><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<span class="form-errors">{{ error }}</span>{% endfor %}</p>{% endfor %}<button class="button button-dark" type="submit">Create account</button></form>
+  <div class="auth-links"><a href="{% url 'login' %}">Already registered? Sign in</a></div>
+</section>
+{% endblock %}

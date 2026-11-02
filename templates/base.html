@@ -1,0 +1,121 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}THE GLOBAL ICON{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Stories That Shape Tomorrow.{% endblock %}">
+  <meta name="theme-color" content="#05070B">
+  <meta property="og:site_name" content="THE GLOBAL ICON">
+  <meta property="og:title" content="{% block og_title %}THE GLOBAL ICON{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Stories That Shape Tomorrow.{% endblock %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <link rel="icon" type="image/svg+xml" href="{% static 'publications/favicon.svg' %}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'publications/site.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% if request.resolver_match.url_name == 'home' %}is-home{% endif %}">
+  <header class="site-header">
+    {% if announcement %}<div class="announcement-bar"><span>{{ announcement.title }}{% if announcement.message %} — {{ announcement.message }}{% endif %}</span>{% if announcement.link_url and announcement.link_label %}<a href="{{ announcement.link_url }}">{{ announcement.link_label }} <span aria-hidden="true">↗</span></a>{% endif %}</div>{% endif %}
+    {% if request.resolver_match.url_name != "home" %}<div class="edition-bar"><div class="edition-bar-inner"><span>{% now "l, F j, Y" %}</span><span class="edition-tagline">Stories That Shape Tomorrow.</span><span class="edition-shortcuts">{% if config.linkedin_url %}<a href="{{ config.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>{% endif %}{% if config.instagram_url %}<a href="{{ config.instagram_url }}" target="_blank" rel="noopener noreferrer">Instagram</a>{% endif %}</span></div></div>{% endif %}
+    <div class="header-inner">
+      <a class="brand-logo" href="{% url 'home' %}" aria-label="THE GLOBAL ICON — Stories That Shape Tomorrow">
+        <img src="{% static 'publications/global-icon-logo-light.svg' %}" alt="THE GLOBAL ICON — Stories That Shape Tomorrow." width="280" height="56">
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Open navigation menu">Menu</button>
+      <nav id="main-nav" class="main-nav" aria-label="Main navigation">
+        <a href="{% url 'home' %}"{% if request.resolver_match.url_name == "home" %} aria-current="page"{% endif %}>Home</a>
+        <a href="{% url 'magazine_list' %}#edition-filters"{% if request.resolver_match.url_name == "magazine_list" %} aria-current="page"{% endif %}>Editions</a>
+        <a href="{% url 'magazine_list' %}#magazine-wall">Magazines</a>
+        <a href="{% url 'article_list' %}"{% if request.resolver_match.url_name == "article_list" or request.resolver_match.url_name == "article_detail" %} aria-current="page"{% endif %}>Stories</a>
+        <a href="{% url 'leader_list' %}"{% if request.resolver_match.url_name == "leader_list" or request.resolver_match.url_name == "leader_detail" %} aria-current="page"{% endif %}>Leaders</a>
+        <a href="{% url 'search' %}"{% if request.resolver_match.url_name == "search" %} aria-current="page"{% endif %}>Discover</a>
+        <a href="{% url 'contact' %}"{% if request.resolver_match.url_name == "contact" %} aria-current="page"{% endif %}>Contact</a>
+        <span class="nav-divider" aria-hidden="true"></span>
+        <button class="search-open" type="button" aria-haspopup="dialog" aria-controls="site-search" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.4 15.4 5 5"/></svg><span>Search</span></button>
+        <span class="nav-divider" aria-hidden="true"></span>
+        <a class="nav-link-rss" href="{% url 'article_feed' %}"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/><path d="M4 11a9 9 0 0 1 9 9M4 5a15 15 0 0 1 15 15"/></svg><span>RSS</span></a>
+        <span class="nav-divider" aria-hidden="true"></span>
+        <a class="nav-link-auth" href="{% url 'login' %}"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg><span>Sign in</span></a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'account' %}">My account</a>
+          {% if user.is_staff %}<a href="{% url 'management_dashboard' %}">Management</a>{% endif %}
+          <a href="{% url 'account_notifications' %}" aria-label="Notifications{% if unread_notifications %}, {{ unread_notifications }} unread{% endif %}">Notifications{% if unread_notifications %} <span class="notification-count">{{ unread_notifications }}</span>{% endif %}</a>
+          <form class="inline-form" action="{% url 'logout' %}" method="post">{% csrf_token %}<button class="nav-text-button" type="submit">Sign out</button></form>
+        {% endif %}
+      </nav>
+      {% if request.resolver_match.url_name != "home" %}<a class="header-cta" href="{% url 'contact' %}">Advertise <span aria-hidden="true">↗</span></a>{% endif %}
+    </div>
+    {% if request.resolver_match.url_name != "home" %}<nav class="category-nav" aria-label="Browse stories by category"><a href="{% url 'article_list' %}">All stories</a>{% for category in header_categories %}<a href="{% url 'article_list' %}?category={{ category.slug }}">{{ category.name }}</a>{% endfor %}</nav>{% endif %}
+  </header>
+  <dialog id="site-search" class="search-dialog" aria-labelledby="site-search-title">
+    <div class="search-dialog-heading"><h2 id="site-search-title">Find your next read</h2><button class="search-close" type="button" aria-label="Close search">×</button></div>
+    <form class="search-form" action="{% url 'search' %}" method="get"><label class="visually-hidden" for="site-search-query">Search stories, editions and leaders</label><input id="site-search-query" name="q" placeholder="Search stories, editions and leaders…" required><button type="submit">Search ↗</button></form>
+  </dialog>
+  <main>
+    {% if messages %}
+      <div class="message-stack" aria-live="polite">
+        {% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div><a class="brand-logo footer-brand-logo" href="{% url 'home' %}" aria-label="THE GLOBAL ICON — Stories That Shape Tomorrow"><img src="{% static 'publications/global-icon-logo-light.svg' %}" alt="THE GLOBAL ICON — Stories That Shape Tomorrow." width="280" height="56"></a><p class="footer-note">Stories That Shape Tomorrow.</p></div>
+      <div class="footer-links"><a href="{% url 'home' %}">Home</a><a href="{% url 'magazine_list' %}#edition-filters">Editions</a><a href="{% url 'magazine_list' %}#magazine-wall">Magazines</a><a href="{% url 'article_list' %}">Stories</a><a href="{% url 'leader_list' %}">Leaders</a><a href="{% url 'search' %}">Discover</a><a href="{% url 'contact' %}">Contact</a><a href="{% url 'article_feed' %}">RSS</a><a href="{% url 'login' %}">Sign in</a></div>
+      <div class="footer-note">{% if config.contact_email %}<a href="mailto:{{ config.contact_email }}">{{ config.contact_email }}</a><br>{% endif %}Independent perspective.<br>Published with purpose.</div>
+    </div>
+    <div class="footer-bottom"><span>© {% now "Y" %} THE GLOBAL ICON</span><span>Stories That Shape Tomorrow.</span></div>
+  </footer>
+  <script src="{% static 'publications/site.js' %}" defer></script>
+  <script>
+    const menuButton = document.querySelector(".menu-toggle");
+    const navigation = document.querySelector("#main-nav");
+    menuButton?.addEventListener("click", () => {
+      const expanded = menuButton.getAttribute("aria-expanded") === "true";
+      menuButton.setAttribute("aria-expanded", String(!expanded));
+      menuButton.setAttribute("aria-label", expanded ? "Open navigation menu" : "Close navigation menu");
+      navigation.classList.toggle("is-open", !expanded);
+    });
+    navigation?.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        menuButton?.setAttribute("aria-expanded", "false");
+        menuButton?.setAttribute("aria-label", "Open navigation menu");
+        navigation.classList.remove("is-open");
+      });
+    });
+    const editionsLink = navigation?.querySelector('a[href$="#edition-filters"]');
+    const magazinesLink = navigation?.querySelector('a[href$="#magazine-wall"]');
+    const syncMagazineNavigation = () => {
+      if (!editionsLink || !magazinesLink) return;
+      if (!window.location.pathname.includes('/magazines/')) return;
+      const onMagazineWall = window.location.hash === "#magazine-wall";
+      if (onMagazineWall) {
+        editionsLink.removeAttribute("aria-current");
+        magazinesLink.setAttribute("aria-current", "page");
+      } else {
+        magazinesLink.removeAttribute("aria-current");
+        editionsLink.setAttribute("aria-current", "page");
+      }
+    };
+    syncMagazineNavigation();
+    window.addEventListener("hashchange", syncMagazineNavigation);
+    const searchDialog = document.querySelector("#site-search");
+    document.querySelector(".search-open")?.addEventListener("click", () => {
+      menuButton?.setAttribute("aria-expanded", "false");
+      menuButton?.setAttribute("aria-label", "Open navigation menu");
+      navigation?.classList.remove("is-open");
+      searchDialog.showModal();
+      searchDialog.querySelector("input").focus();
+    });
+    searchDialog?.querySelector(".search-close")?.addEventListener("click", () => searchDialog.close());
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

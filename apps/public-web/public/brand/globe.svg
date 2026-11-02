@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+  <defs>
+    <radialGradient id="sphere" cx="34%" cy="28%" r="74%">
+      <stop offset="0" stop-color="#324b5a"/>
+      <stop offset=".48" stop-color="#172a38"/>
+      <stop offset=".82" stop-color="#101c29"/>
+      <stop offset="1" stop-color="#090f18"/>
+    </radialGradient>
+    <radialGradient id="shine" cx="24%" cy="17%" r="72%">
+      <stop offset="0" stop-color="#f4d294" stop-opacity=".36"/>
+      <stop offset=".55" stop-color="#72a6a4" stop-opacity=".1"/>
+      <stop offset="1" stop-color="#101827" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f5d69c"/>
+      <stop offset=".45" stop-color="#69a9a4"/>
+      <stop offset="1" stop-color="#c7a76c"/>
+    </linearGradient>
+    <clipPath id="sphere-clip"><circle cx="320" cy="320" r="264"/></clipPath>
+    <filter id="soft-shadow" x="-.3" y="-.3" width="1.6" height="1.6">
+      <feGaussianBlur stdDeviation="9"/>
+    </filter>
+  </defs>
+  <circle cx="322" cy="337" r="269" fill="#03070b" opacity=".55" filter="url(#soft-shadow)"/>
+  <circle cx="320" cy="320" r="264" fill="url(#sphere)" stroke="url(#rim)" stroke-width="2.2"/>
+  <circle cx="320" cy="320" r="264" fill="url(#shine)"/>
+  <g clip-path="url(#sphere-clip)">
+    <g fill="#c7a76c" fill-opacity=".72" stroke="#eed5a6" stroke-opacity=".48" stroke-width="1.4">
+      <path d="m105 202 20-29 31-13 18-27 28-8 15 13 27 2 17 20-8 19 14 15-10 17-28 4-9 15-28 3-12 17-25 2-11-18-20-4-7-20-19-3z"/>
+      <path d="m214 270 24 11 15 19-4 24 13 25-8 26-11 15-2 34-17 29-8 42-19 28-9-24-13-24 2-31-13-27 5-30-10-25 7-27-5-22 13-27z"/>
+      <path d="m291 167 20-19 31 1 14 16-8 18-28 5-11-11-24 5z"/>
+      <path d="m300 206 30-17 34 8 15-17 37 8 16-11 35 17 10 20-19 18-20-8-17 17-23-8-17 18-26-5-9 20-22 4-10 25-19-8-9-24-17-12 6-24-15-16z"/>
+      <path d="m337 275 24-12 32 12 15 22 17 17 3 28-18 17-5 31-21 25-11 39-21 25-13-18-3-31-16-18 2-29-12-24 10-24-3-24 13-19z"/>
+      <path d="m442 367 18-11 20 9 10 18-12 16-22-3-17-13z"/>
+      <path d="m483 390 20-8 14 12-4 17-20 8-14-12z"/>
+      <path d="m119 333 17-15 17 10-3 18-14 9-13-7z"/>
+      <path d="m267 153 12-11 13 6 1 13-14 9z"/>
+    </g>
+    <g fill="none" stroke="#d4e0dc" stroke-opacity=".2">
+      <ellipse cx="320" cy="320" rx="112" ry="264"/>
+      <ellipse cx="320" cy="320" rx="202" ry="264"/>
+      <ellipse cx="320" cy="320" rx="263" ry="88"/>
+      <ellipse cx="320" cy="320" rx="263" ry="174"/>
+      <path d="M56 320h528M320 56v528"/>
+    </g>
+    <path d="M57 269c65-130 192-211 333-208" fill="none" stroke="#fff1d2" stroke-opacity=".38" stroke-width="3"/>
+    <path d="M73 413c103 104 246 145 381 109" fill="none" stroke="#73b3ad" stroke-opacity=".4" stroke-width="2"/>
+  </g>
+  <ellipse cx="320" cy="320" rx="292" ry="86" fill="none" stroke="#c7a76c" stroke-opacity=".68" stroke-width="2" transform="rotate(-18 320 320)"/>
+  <ellipse cx="320" cy="320" rx="296" ry="89" fill="none" stroke="#397c80" stroke-opacity=".45" stroke-width="1.5" transform="rotate(22 320 320)"/>
+  <circle cx="109" cy="393" r="5" fill="#e1c27e"/>
+  <circle cx="536" cy="252" r="4" fill="#78b8b2"/>
+</svg>

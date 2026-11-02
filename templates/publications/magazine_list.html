@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Editions — THE GLOBAL ICON{% endblock %}
+{% block meta_description %}Browse digital editions of THE GLOBAL ICON by year, category and regional edition.{% endblock %}
+{% block content %}
+<nav class="breadcrumbs shell" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a><span aria-hidden="true">/</span><span aria-current="page">Magazine editions</span></nav>
+<section class="page-intro shell"><p class="eyebrow">THE GLOBAL ICON · The archive</p><h1>Every issue.<br><em>A new perspective.</em></h1><p>Explore published editions, interviews and regional perspectives.</p></section>
+{% if show_magazine_wall and wall_magazines %}{% include "publications/partials/magazine_wall.html" %}{% endif %}
+<section class="section shell">
+  {% if trending_magazines %}<section class="trending-editions" aria-labelledby="trending-editions-title"><div class="section-heading"><div><p class="eyebrow">Reader activity · past 30 days</p><h2 id="trending-editions-title">Trending with readers</h2></div></div><div class="edition-grid">{% for magazine in trending_magazines %}{% include "publications/partials/magazine_card.html" with magazine=magazine %}{% endfor %}</div></section>{% endif %}
+  <form class="catalog-filters" id="edition-filters" method="get" action="{% url 'magazine_list' %}">
+    <label>Search editions<input name="q" value="{{ query }}" type="search" placeholder="Title or featured leader"></label>
+    <label>Year<select name="year"><option value="">All years</option>{% for year in years %}<option value="{{ year|date:'Y' }}" {% if selected_year == year|date:'Y' %}selected{% endif %}>{{ year|date:"Y" }}</option>{% endfor %}</select></label>
+    <label>Category<select name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></label>
+    <label>Edition<select name="edition"><option value="">All editions</option>{% for edition in editions %}<option value="{{ edition.slug }}" {% if selected_edition == edition.slug %}selected{% endif %}>{{ edition.name }}</option>{% endfor %}</select></label>
+    <label>Featured<select name="featured"><option value="">All editions</option><option value="1" {% if selected_featured == "1" %}selected{% endif %}>Featured only</option></select></label>
+    <label>Language<select name="language"><option value="">All languages</option>{% for code,label in languages %}<option value="{{ code }}" {% if selected_language == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+    <label>Sort<select name="sort"><option value="newest" {% if sort == "newest" %}selected{% endif %}>Newest</option><option value="oldest" {% if sort == "oldest" %}selected{% endif %}>Oldest</option><option value="relevant" {% if sort == "relevant" %}selected{% endif %}>Most relevant</option></select></label>
+    <div class="filter-actions"><button class="button button-dark" type="submit">Apply filters</button><a class="text-link" href="{% url 'magazine_list' %}">Clear</a></div>
+  </form>
+  <div class="edition-grid edition-grid-large">
+  {% for magazine in page %}{% include "publications/partials/magazine_card.html" with magazine=magazine %}{% empty %}<div class="empty-state"><p>No editions found.</p><span>Try another year, category or search term.</span></div>{% endfor %}
+  </div>
+  {% include "publications/pagination.html" with page=page filter_query=filter_query %}
+</section>
+{% endblock %}

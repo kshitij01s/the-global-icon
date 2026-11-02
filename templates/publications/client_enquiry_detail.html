@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Enquiry {{ enquiry.reference }} — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Your enquiry · {{ enquiry.reference }}</p><h1>{{ enquiry.subject }}</h1><p>{{ enquiry.get_enquiry_type_display }} · Submitted {{ enquiry.submitted_at|date:"M j, Y, P" }}</p></section>
+<section class="section shell client-enquiry-detail">
+  <div class="contact-confirmation"><p class="eyebrow">Current status</p><h2>{{ enquiry.get_status_display }}</h2><p>Our team will follow up using your selected contact method when available.</p></div>
+  <dl><dt>Company</dt><dd>{{ enquiry.company }}</dd><dt>Message</dt><dd>{{ enquiry.message|linebreaksbr }}</dd>{% if enquiry.follow_up_at %}<dt>Follow-up</dt><dd>{{ enquiry.follow_up_at|date:"M j, Y, P" }}</dd>{% endif %}</dl>
+  <a class="text-link" href="{% url 'client_enquiries' %}">← Back to your enquiries</a>
+</section>
+{% endblock %}

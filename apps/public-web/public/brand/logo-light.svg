@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 112" role="img" aria-label="THE GLOBAL ICON — Stories That Shape Tomorrow.">
+  <defs>
+    <linearGradient id="gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2C66D"/>
+      <stop offset="50%" stop-color="#D6AD55"/>
+      <stop offset="100%" stop-color="#B88A30"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(6 8)">
+    <circle cx="48" cy="48" r="44" fill="#05070B"/>
+    <circle cx="48" cy="48" r="43" fill="none" stroke="url(#gold-grad)" stroke-width="2.2"/>
+    <ellipse cx="48" cy="48" rx="20" ry="43" fill="none" stroke="#D6AD55" stroke-opacity=".35" stroke-width="1.2"/>
+    <ellipse cx="48" cy="48" rx="43" ry="18" fill="none" stroke="#D6AD55" stroke-opacity=".35" stroke-width="1.2"/>
+    <path d="M12 48h72M48 5v86" fill="none" stroke="#F7F5F0" stroke-opacity=".4" stroke-width="0.8"/>
+    <path d="M21 27c8-11 20-17 33-16L48 20l-8 2-4 9-9 3zm24-10 11-7 11 4 2 7-11 3-5 8-8-4zm8 27 9-7 11 5 1 11-8 7-3 15-8 8-7-11 3-12-5-7zm-25-3 12 4 2 10-7 8-8-4-8-10z" fill="url(#gold-grad)"/>
+    <circle cx="48" cy="48" r="47" fill="none" stroke="#D6AD55" stroke-width=".7" stroke-dasharray="2 3" stroke-opacity=".6"/>
+  </g>
+  <text x="112" y="49" fill="#FFFFFF" font-family="'Cinzel', 'Playfair Display', Georgia, 'Times New Roman', serif" font-size="12" font-weight="700" letter-spacing="3.6">THE</text>
+  <text x="111" y="80" fill="#FFFFFF" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="31" font-weight="700" letter-spacing="1.2">GLOBAL <tspan fill="url(#gold-grad)">ICON</tspan></text>
+  <path d="M112 88h300" stroke="url(#gold-grad)" stroke-opacity=".85" stroke-width="1"/>
+  <text x="113" y="103" fill="#E2E5EB" font-family="'Playfair Display', Georgia, 'Times New Roman', serif" font-size="11.5" font-style="italic" letter-spacing=".6">Stories That Shape Tomorrow.</text>
+</svg>

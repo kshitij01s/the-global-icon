@@ -1,0 +1,75 @@
+# --- Secrets / local environment ---
+.env
+.env.*
+!.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+apps/api/.superadmin-local.txt
+*.local.txt
+.venv/
+venv/
+*.pem
+*.key
+credentials*.json
+service-account*.json
+
+# --- Python / Django (legacy app) ---
+__pycache__/
+*.py[cod]
+db.sqlite3
+media/
+private_media/
+staticfiles/
+.pytest_cache/
+.coverage
+
+# --- Node / JavaScript ---
+node_modules/
+npm-debug.log*
+yarn-error.log*
+dist/
+build/
+.next/
+out-tsc/
+tmp/
+coverage/
+*.tsbuildinfo
+*.log
+*.dump
+*.sql.gz
+
+# --- Angular / frontend caches ---
+.angular/
+.angular/cache/
+.sass-cache/
+.vite/
+.cache/
+
+# --- Editors / OS ---
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# --- Development storage ---
+# Directory structure is kept via .gitkeep and the small generated cover PNGs
+# (storage/development-only/demo-pdf-covers) are committed. PDFs are NOT
+# committed: copy the five supplied demo PDFs into
+# storage/development-only/magazines/pdfs/supplied/ (see docs/SUPPLIED_PDFS.md).
+storage/development-only/**/*.pdf
+storage/development-only/uploads/**
+!storage/development-only/uploads/.gitkeep
+# Never commit production storage or private backups.
+storage/production/
+storage/backups/
+
+apps/api/.superadmin-local.txt
+apps/api/.env
+node_modules/
+dist/
+*.local.txt

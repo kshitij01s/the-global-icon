@@ -1,0 +1,10 @@
+{% if advertisement %}
+<aside class="sponsored-placement{% if advertisement.is_demo %} sponsored-placement-demo{% endif %}" aria-label="Advertisement" data-ad-impression>
+  <p class="sponsored-placement-label">{% if advertisement.is_demo %}Demo promotion · Fictional{% else %}Advertisement{% endif %}</p>
+  <a class="sponsored-placement-link" href="{{ advertisement.get_click_url }}" target="_blank" rel="sponsored nofollow noopener noreferrer">
+    {% if advertisement.has_image %}<img src="{{ advertisement.image.url }}" alt="{{ advertisement.alt_text|default:advertisement.advertiser }}" loading="lazy">{% endif %}
+    <span class="sponsored-placement-copy"><strong>{{ advertisement.title }}</strong>{% if advertisement.description %}<span>{{ advertisement.description }}</span>{% endif %}<span class="sponsored-placement-cta">{{ advertisement.cta_label }} ↗</span><small>{{ advertisement.advertiser }}</small></span>
+  </a>
+  {% if advertisement.track_impressions %}<form class="ad-impression-form" method="post" action="{% url 'advertisement_impression' advertisement.pk %}" hidden><input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}"></form>{% endif %}
+</aside>
+{% endif %}

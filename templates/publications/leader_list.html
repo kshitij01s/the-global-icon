@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Featured leaders — THE GLOBAL ICON{% endblock %}
+{% block meta_description %}Profiles and interviews with leaders featured in THE GLOBAL ICON.{% endblock %}
+{% block content %}
+<nav class="breadcrumbs shell" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a><span aria-hidden="true">/</span><span aria-current="page">Featured leaders</span></nav>
+<section class="leaders-banner leaders-banner-page"><div class="shell"><p class="eyebrow">Ideas, people, industries</p><h1>Featured leaders</h1><p>Meet the people behind the ideas shaping their fields. Each profile links to its published editorial feature or magazine issue.</p></div></section>
+<section class="section shell leader-catalog">
+  <form class="catalog-filters" method="get" action="{% url 'leader_list' %}">
+    <label>Search leaders<input name="q" value="{{ query }}" type="search" placeholder="Name, role or organization"></label>
+    <label>Year<select name="year"><option value="">All years</option>{% for year in years %}<option value="{{ year|date:'Y' }}" {% if selected_year == year|date:'Y' %}selected{% endif %}>{{ year|date:"Y" }}</option>{% endfor %}</select></label>
+    <label>Category<select name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></label>
+    <label>Edition<select name="edition"><option value="">All editions</option>{% for edition in editions %}<option value="{{ edition.slug }}" {% if selected_edition == edition.slug %}selected{% endif %}>{{ edition.name }}</option>{% endfor %}</select></label>
+    <label>Featured<select name="featured"><option value="">All leaders</option><option value="1" {% if selected_featured == "1" %}selected{% endif %}>Featured only</option></select></label>
+    <div class="filter-actions"><button class="button button-dark" type="submit">Apply filters</button><a class="text-link" href="{% url 'leader_list' %}">Clear</a></div>
+  </form>
+  <div class="leader-grid">{% for leader in page %}{% include "publications/partials/leader_card.html" with leader=leader %}{% empty %}<div class="empty-state"><p>No leader features match those filters.</p><span>Try broadening your search or selecting a different edition.</span></div>{% endfor %}</div>
+  {% include "publications/pagination.html" with page=page filter_query=filter_query %}
+</section>
+{% endblock %}

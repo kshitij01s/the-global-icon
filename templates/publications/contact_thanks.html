@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Enquiry received — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="section shell contact-confirmation">
+  <p class="eyebrow">Thank you for reaching out</p>
+  <h1>Your enquiry has been <em>saved.</em></h1>
+  <p>Our team can now review your message. Keep this reference for your records:</p>
+  <p class="contact-reference">{{ reference }}</p>
+  <p>This confirms that the enquiry was saved to our system. It does not confirm that an email notification was delivered.</p>
+  {% if user.is_authenticated %}<a class="button button-dark" href="{% url 'client_enquiries' %}">View your enquiries ↗</a>{% else %}<a class="button button-dark" href="{% url 'home' %}">Return to the homepage ↗</a>{% endif %}
+</section>
+{% endblock %}

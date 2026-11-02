@@ -1,0 +1,666 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  REVIEWER
+  PUBLISHER
+  AD_MANAGER
+  ENQUIRY_MANAGER
+  READER
+  SUBSCRIBER
+}
+
+enum ArticleStatus {
+  DRAFT
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum MagazineReviewStatus {
+  DRAFT
+  IN_REVIEW
+  CHANGES_REQUESTED
+  APPROVED
+  ARCHIVED
+}
+
+enum MagazineAccess {
+  PUBLIC
+  MEMBERS
+}
+
+enum EnquiryType {
+  ADVERTISING
+  FEATURE
+  SUBSCRIPTION
+  PARTNERSHIP
+  COLLABORATION
+  EDITORIAL
+  TECHNICAL
+  GENERAL
+}
+
+enum EnquiryStatus {
+  NEW
+  UNDER_REVIEW
+  CONTACTED
+  AWAITING_CLIENT
+  QUALIFIED
+  CONVERTED
+  CLOSED
+  SPAM
+}
+
+enum AdPlacement {
+  HOMEPAGE_BANNER
+  HOMEPAGE_SIDEBAR
+  MAGAZINE_SIDEBAR
+  READER_SIDEBAR
+  BETWEEN_SECTIONS
+  RELATED_MAGAZINES
+  NEWSLETTER
+  FEATURED_PARTNER
+}
+
+enum AdEventType {
+  IMPRESSION
+  CLICK
+}
+
+enum NotificationType {
+  NEW_PUBLICATION
+  CLIENT_ENQUIRY
+  CONTENT_APPROVAL
+  SYSTEM
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  firstName    String?
+  lastName     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  roles              UserRole[]
+  refreshTokens      RefreshToken[]
+  author             Author?
+  submittedMagazines Magazine[]           @relation("MagazineSubmittedBy")
+  reviewedMagazines  Magazine[]           @relation("MagazineReviewedBy")
+  publishedMagazines Magazine[]           @relation("MagazinePublishedBy")
+  enquiries          Enquiry[]            @relation("EnquirySubmitter")
+  assignedEnquiries  Enquiry[]            @relation("EnquiryAssignee")
+  preferences        ReaderPreference?
+  notifications      Notification[]
+  savedContent       SavedContent[]
+  readingHistory     ReadingHistory[]
+  auditLogs          AuditLog[]
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        RoleName         @unique
+  description String?
+  permissions RolePermission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles          Article[]
+  magazines         Magazine[]
+  leaders           Leader[]
+  homepageSections  HomepageSection[]
+  readerPreferences ReaderPreferenceCategory[]
+}
+
+model EditionSeries {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  region    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  magazines Magazine[]
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  userId    String?  @unique
+  name      String
+  slug      String   @unique
+  bio       String?
+  portrait  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  articles  Article[]
+}
+
+model Article {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  excerpt         String?
+  body            String
+  language        String        @default("en")
+  translatedFromId String?
+  authorId        String?
+  categoryId      String?
+  featuredImage   String?
+  status          ArticleStatus @default(DRAFT)
+  isFeatured      Boolean       @default(false)
+  isSponsored     Boolean       @default(false)
+  memberOnly      Boolean       @default(false)
+  metaDescription String?
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  author           Author?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  category         Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  translatedFrom   Article?         @relation("ArticleTranslations", fields: [translatedFromId], references: [id], onDelete: SetNull)
+  translations     Article[]        @relation("ArticleTranslations")
+  relatedMagazines MagazineArticle[]
+  leaders          Leader[]
+  homepageSections HomepageSectionArticle[]
+  savedBy          SavedContent[]
+  readingHistory   ReadingHistory[]
+  featuredOnSite   SiteSettings[]   @relation("FeaturedArticle")
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+}
+
+model Magazine {
+  id              String                @id @default(cuid())
+  title           String
+  slug            String                @unique
+  subtitle        String?
+  language        String                @default("en")
+  translatedFromId String?
+  description     String?
+  publisherName   String?
+  issueNumber     String?
+  editionSeriesId String?
+  categoryId      String?
+  coverImage      String?
+  coverAltText    String?
+  backCoverImage  String?
+  pdfKey          String?
+  pageCount       Int?
+  access          MagazineAccess        @default(PUBLIC)
+  allowDownload   Boolean               @default(true)
+  reviewStatus    MagazineReviewStatus  @default(DRAFT)
+  submittedById   String?
+  submittedAt     DateTime?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  publishedById   String?
+  publishedAt     DateTime?
+  isFeatured      Boolean               @default(false)
+  isPublished     Boolean               @default(false)
+  publicationDate DateTime              @db.Date
+  metaDescription String?
+  isDemo          Boolean               @default(false)
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  editionSeries    EditionSeries?     @relation(fields: [editionSeriesId], references: [id], onDelete: SetNull)
+  category         Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  translatedFrom   Magazine?          @relation("MagazineTranslations", fields: [translatedFromId], references: [id], onDelete: SetNull)
+  translations     Magazine[]         @relation("MagazineTranslations")
+  submittedBy      User?              @relation("MagazineSubmittedBy", fields: [submittedById], references: [id], onDelete: SetNull)
+  reviewedBy       User?              @relation("MagazineReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  publishedBy      User?              @relation("MagazinePublishedBy", fields: [publishedById], references: [id], onDelete: SetNull)
+  relatedArticles  MagazineArticle[]
+  relatedFrom      MagazineRelation[] @relation("RelatedFrom")
+  relatedTo        MagazineRelation[] @relation("RelatedTo")
+  leaders          Leader[]
+  savedBy          SavedContent[]
+  readingHistory   ReadingHistory[]
+  featuredOnSite   SiteSettings[]     @relation("FeaturedMagazine")
+
+  @@index([isPublished, publicationDate])
+  @@index([reviewStatus])
+  @@index([categoryId])
+}
+
+model MagazineArticle {
+  magazineId String
+  articleId  String
+  magazine   Magazine @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([magazineId, articleId])
+}
+
+model MagazineRelation {
+  fromMagazineId String
+  toMagazineId   String
+  fromMagazine   Magazine @relation("RelatedFrom", fields: [fromMagazineId], references: [id], onDelete: Cascade)
+  toMagazine     Magazine @relation("RelatedTo", fields: [toMagazineId], references: [id], onDelete: Cascade)
+
+  @@id([fromMagazineId, toMagazineId])
+}
+
+model Leader {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  designation     String?
+  organization    String?
+  introduction    String?
+  portrait        String?
+  categoryId      String?
+  articleId       String?
+  magazineId      String?
+  publicationDate DateTime @db.Date
+  isPublished     Boolean  @default(false)
+  isFeatured      Boolean  @default(false)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  article  Article?  @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  magazine Magazine? @relation(fields: [magazineId], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, publicationDate])
+}
+
+model HomepageSection {
+  id           String   @id @default(cuid())
+  title        String
+  subtitle     String?
+  categoryId   String
+  displayOrder Int      @default(0)
+  isVisible    Boolean  @default(true)
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  articles     HomepageSectionArticle[]
+}
+
+model HomepageSectionArticle {
+  sectionId String
+  articleId String
+  section   HomepageSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  article   Article         @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([sectionId, articleId])
+}
+
+model Partner {
+  id           String  @id @default(cuid())
+  name         String
+  logo         String?
+  websiteUrl   String?
+  displayOrder Int     @default(0)
+  isVisible    Boolean @default(true)
+}
+
+model Announcement {
+  id        String    @id @default(cuid())
+  title     String
+  message   String?
+  linkLabel String?
+  linkUrl   String?
+  startsAt  DateTime?
+  endsAt    DateTime?
+  isActive  Boolean   @default(true)
+  updatedAt DateTime  @updatedAt
+}
+
+model SiteSettings {
+  id                 Int      @id @default(1)
+  siteName           String   @default("THE GLOBAL ICON")
+  tagline            String   @default("Stories That Shape Tomorrow.")
+  heroTitle          String   @default("Stories That Shape Tomorrow.")
+  heroCopy           String   @default("Discover the people, ideas, and innovations shaping tomorrow's world.")
+  featuredArticleId  String?
+  featuredMagazineId String?
+  newsletterHeading  String   @default("The week, in perspective.")
+  newsletterCopy     String   @default("Thoughtful reads and new editions, delivered to your inbox.")
+  contactEmail       String?
+  contactPhone       String?
+  officeAddress      String?
+  contactResponseTime String?
+  linkedinUrl        String?
+  instagramUrl       String?
+  twitterUrl         String?
+  youtubeUrl         String?
+  updatedAt          DateTime @updatedAt
+
+  featuredArticle  Article?  @relation("FeaturedArticle", fields: [featuredArticleId], references: [id], onDelete: SetNull)
+  featuredMagazine Magazine? @relation("FeaturedMagazine", fields: [featuredMagazineId], references: [id], onDelete: SetNull)
+}
+
+model Enquiry {
+  id                      String        @id @default(cuid())
+  reference               String        @unique
+  submissionToken         String        @unique @default(cuid())
+  submittedById           String?
+  fullName                String
+  company                 String
+  email                   String
+  phone                   String?
+  jobTitle                String?
+  website                 String?
+  countryOrRegion         String?
+  enquiryType             EnquiryType
+  subject                 String
+  message                 String
+  estimatedBudget         String?
+  preferredContact        String?
+  preferredFollowUpTime   String?
+  status                  EnquiryStatus @default(NEW)
+  assignedToId            String?
+  internalNotes           String?
+  followUpAt              DateTime?
+  emailNotificationStatus String        @default("not_configured")
+  emailNotificationError  String?
+  emailNotifiedAt         DateTime?
+  submittedAt             DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  submittedBy User? @relation("EnquirySubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  assignedTo  User? @relation("EnquiryAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+  @@index([enquiryType, submittedAt])
+}
+
+model Advertisement {
+  id                 String      @id @default(cuid())
+  title              String
+  advertiser         String
+  description        String?
+  image              String?
+  destinationUrl     String
+  placement          AdPlacement
+  startsAt           DateTime?
+  endsAt             DateTime?
+  isActive           Boolean     @default(false)
+  displayPriority    Int         @default(0)
+  campaignIdentifier String?
+  altText            String?
+  ctaLabel           String      @default("Learn more")
+  trackImpressions   Boolean     @default(true)
+  trackClicks        Boolean     @default(true)
+  isDemo             Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  events             AdvertisementEvent[]
+
+  @@index([placement, isActive, startsAt, endsAt])
+}
+
+model AdvertisementEvent {
+  id              String      @id @default(cuid())
+  advertisementId String
+  eventType       AdEventType
+  placement       AdPlacement
+  createdAt       DateTime    @default(now())
+  advertisement   Advertisement @relation(fields: [advertisementId], references: [id], onDelete: Cascade)
+
+  @@index([eventType, createdAt])
+  @@index([placement, createdAt])
+}
+
+model NewsletterSubscriber {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  unsubscribeToken String    @unique @default(cuid())
+  consentedAt      DateTime  @default(now())
+  isActive         Boolean   @default(true)
+  unsubscribedAt   DateTime?
+}
+
+model ReaderPreference {
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  notifyFollowedPublications Boolean  @default(true)
+  /// Personal reading mode: light | dark | system. Never overrides Super Admin emergency override.
+  colorMode                  String   @default("system")
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories                 ReaderPreferenceCategory[]
+}
+
+model ReaderPreferenceCategory {
+  preferenceId String
+  categoryId   String
+  preference   ReaderPreference @relation(fields: [preferenceId], references: [id], onDelete: Cascade)
+  category     Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([preferenceId, categoryId])
+}
+
+model Notification {
+  id               String           @id @default(cuid())
+  recipientId      String
+  notificationType NotificationType
+  title            String
+  message          String
+  targetUrl        String?
+  dedupeKey        String
+  createdAt        DateTime         @default(now())
+  readAt           DateTime?
+  recipient        User             @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([recipientId, dedupeKey])
+  @@index([recipientId, readAt, createdAt])
+}
+
+model SavedContent {
+  id         String   @id @default(cuid())
+  userId     String
+  articleId  String?
+  magazineId String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article    Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  magazine   Magazine? @relation(fields: [magazineId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@unique([userId, magazineId])
+  @@index([userId, createdAt])
+}
+
+model ReadingHistory {
+  id           String   @id @default(cuid())
+  userId       String
+  articleId    String?
+  magazineId   String?
+  lastViewedAt DateTime @default(now())
+  lastPage     Int      @default(1)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article      Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  magazine     Magazine? @relation(fields: [magazineId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, articleId])
+  @@unique([userId, magazineId])
+  @@index([userId, lastViewedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  eventType  String
+  modelLabel String
+  objectId   String
+  objectRepr String
+  details    Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, createdAt])
+}
+
+model DemoSeedRecord {
+  id        String @id @default(cuid())
+  modelName String
+  objectId  String
+
+  @@unique([modelName, objectId])
+}
+
+model MigrationIdMap {
+  id       String @id @default(cuid())
+  oldTable String
+  oldId    String
+  newId    String
+
+  @@unique([oldTable, oldId])
+  @@index([newId])
+}
+
+/// Design-token theme (library or festival). Tokens map to CSS custom properties.
+model ThemeDefinition {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  kind        String   @default("LIBRARY") // LIBRARY | FESTIVAL
+  festivalKey String?
+  tokens      Json
+  effects     Json?
+  isBuiltIn   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Singleton (id=1) controlling global appearance resolution.
+model AppearanceSettings {
+  id                     Int       @id @default(1)
+  globalThemeSlug        String    @default("midnight-dark")
+  manualOverrideSlug     String?
+  manualOverrideUntil    DateTime?
+  festivalAutoEnabled    Boolean   @default(true)
+  effectsEnabled         Boolean   @default(true)
+  allowAdminGlobalChange Boolean   @default(false)
+  allowReaderPreference  Boolean   @default(true)
+  defaultRestoreSlug     String    @default("midnight-dark")
+  updatedAt              DateTime  @updatedAt
+  updatedById            String?
+}
+
+model FestivalSchedule {
+  id               String   @id @default(cuid())
+  eventKey         String
+  name             String
+  themeSlug        String
+  startsAt         DateTime
+  endsAt           DateTime
+  timezone         String   @default("UTC")
+  priority         Int      @default(10)
+  enabled          Boolean  @default(true)
+  regions          Json?
+  restoreThemeSlug String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([enabled, startsAt, endsAt])
+  @@index([priority])
+}
+
+model ThemeHistory {
+  id            String   @id @default(cuid())
+  previousSlug  String?
+  newSlug       String
+  changeType    String
+  scope         String   @default("global")
+  actorId       String?
+  details       Json?
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// CMS-managed public pages (home, about, advertise, contact, …).
+model ManagedPage {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  description   String?
+  content       Json
+  status        String    @default("DRAFT") // DRAFT | PUBLISHED
+  pageThemeSlug String?
+  publishedAt   DateTime?
+  updatedAt     DateTime  @updatedAt
+  updatedById   String?
+  versions      ManagedPageVersion[]
+}
+
+model ManagedPageVersion {
+  id            String   @id @default(cuid())
+  pageId        String
+  title         String
+  description   String?
+  content       Json
+  pageThemeSlug String?
+  note          String?
+  createdAt     DateTime @default(now())
+  createdById   String?
+  page          ManagedPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, createdAt])
+}

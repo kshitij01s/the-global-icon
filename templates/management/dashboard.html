@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Management dashboard — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Management</p><h1>Publishing,<br><em>in good order.</em></h1><p>Tools and activity available to your assigned permissions.</p></section>
+<section class="section section-tint"><div class="shell management-shell">
+  <div class="management-actions">
+    {% if can_view_magazines %}<a class="button button-outline" href="{% url 'management_magazines' %}">Manage editions ↗</a>{% endif %}
+    {% if can_view_articles %}<a class="button button-outline" href="{% url 'admin:publications_article_changelist' %}">Manage articles ↗</a>{% endif %}
+    {% if can_manage_ads %}<a class="button button-outline" href="{% url 'admin:publications_advertisement_changelist' %}">Manage advertisements ↗</a><a class="button button-outline" href="{% url 'advertising_report' %}">Campaign report ↗</a>{% endif %}
+    {% if can_manage_site %}<a class="button button-outline" href="{% url 'admin:publications_siteconfiguration_changelist' %}">Site configuration ↗</a>{% endif %}
+    {% if can_manage_enquiries %}<a class="button button-outline" href="{% url 'admin:publications_clientenquiry_changelist' %}">Client enquiries{% if new_enquiries %} ({{ new_enquiries }} new){% endif %} ↗</a>{% endif %}
+    {% if is_superuser %}<a class="button button-outline" href="{% url 'admin:auth_user_changelist' %}">Manage users ↗</a><a class="button button-outline" href="{% url 'admin:publications_managementauditevent_changelist' %}">Audit events ↗</a>{% endif %}
+    {% if can_upload_magazines %}<a class="button button-dark" href="{% url 'management_magazine_upload' %}">Submit an edition ↗</a>{% endif %}
+  </div>
+  <div class="management-stats">
+    {% if can_view_magazines %}<article><span>Total editions</span><strong>{{ magazine_total }}</strong></article><article><span>Published</span><strong>{{ magazine_published }}</strong></article><article><span>Drafts</span><strong>{{ magazine_draft }}</strong></article>{% endif %}
+    {% if can_approve_magazines %}<article><span>Awaiting review</span><strong>{{ magazine_pending }}</strong></article>{% endif %}
+    {% if can_view_articles %}<article><span>Articles</span><strong>{{ article_total }}</strong></article>{% endif %}
+    {% if can_manage_ads %}<article><span>Eligible campaigns</span><strong>{{ active_advertisements }}</strong></article>{% endif %}
+    {% if can_view_subscribers %}<article><span>Active newsletter records</span><strong>{{ active_subscribers }}</strong></article>{% endif %}
+    {% if can_manage_enquiries %}<article><span>New client enquiries</span><strong>{{ new_enquiries }}</strong></article><article><span>Unread staff notifications</span><strong>{{ unread_notifications }}</strong></article>{% endif %}
+  </div>
+  {% if not can_view_magazines and not can_view_articles and not can_manage_ads and not can_manage_site and not can_manage_enquiries and not is_superuser %}<p class="empty-state">Your staff account has no management permissions yet. Ask a superuser to assign the required permissions.</p>{% endif %}
+</div></section>
+{% endblock %}

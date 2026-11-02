@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sign in — THE GLOBAL ICON{% endblock %}
+{% block content %}<section class="page-intro shell login-panel"><img class="auth-brand-logo" src="{% static 'publications/global-icon-logo-light.svg' %}" alt="THE GLOBAL ICON — Stories That Shape Tomorrow." width="280" height="56"><p class="eyebrow">Member access</p><h1>Welcome back.</h1><form method="post" class="login-form">{% csrf_token %}{{ form.as_p }}<input type="hidden" name="next" value="{{ next }}"><button class="button button-dark" type="submit">Sign in <span>↗</span></button></form><div class="auth-links"><a href="{% url 'password_reset' %}">Forgot your password?</a><a href="{% url 'register_reader' %}">Create a reader account</a></div></section>{% endblock %}

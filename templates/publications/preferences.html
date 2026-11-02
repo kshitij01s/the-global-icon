@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Reading preferences — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Your account</p><h1>Choose your<br><em>topics.</em></h1><p>Follow categories to shape recommendations. You can change these preferences at any time.</p></section>
+<section class="section shell"><form method="post" class="topic-preferences-form standalone-preferences">{% csrf_token %}{% for error in form.non_field_errors %}<p class="form-errors">{{ error }}</p>{% endfor %}<fieldset><legend>Categories to follow</legend>{% for choice in form.preferred_categories %}<label>{{ choice.tag }} {{ choice.choice_label }}</label>{% empty %}<p>Categories will appear as the editorial archive grows.</p>{% endfor %}</fieldset><label class="preference-toggle">{{ form.notify_followed_publications }} Recommend new public editions from followed topics</label><button class="button button-dark" type="submit">Save preferences</button></form></section>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load advertising %}
+{% block title %}{{ magazine.title }} — THE GLOBAL ICON{% endblock %}
+{% block meta_description %}{{ magazine.meta_description|default:magazine.description|truncatechars:160 }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs shell" aria-label="Breadcrumb"><a href="{% url 'home' %}">Home</a><span aria-hidden="true">/</span><a href="{% url 'magazine_list' %}">Editions</a><span aria-hidden="true">/</span><span aria-current="page">{{ magazine.title }}</span></nav>
+<section class="magazine-detail-showcase">
+  <div class="magazine-detail-glow" aria-hidden="true"></div>
+  <div class="shell magazine-detail-layout">
+    <figure class="magazine-stage" data-magazine-tilt>
+      <span class="magazine-stage-halo" aria-hidden="true"></span>
+      <span class="magazine-stage-pedestal" aria-hidden="true"></span>
+      <span class="magazine-stage-shadow" aria-hidden="true"></span>
+      <span class="magazine-stage-object">
+        {% if magazine.has_cover %}<img class="magazine-stage-cover" src="{{ magazine.cover.url }}" alt="{{ magazine.cover_alt_text|default:'Cover of '|add:magazine.title }}" fetchpriority="high" width="520" height="700">
+        {% else %}<span class="magazine-stage-cover cover-art cover-art-{{ magazine.category.slug|default:'business' }}" role="img" aria-label="Cover design for {{ magazine.title }}"><span>THE GLOBAL ICON</span><strong>{{ magazine.title }}</strong>{% if magazine.subtitle %}<small>{{ magazine.subtitle }}</small>{% endif %}<i>{% if magazine.slug|slice:":5" == "demo-" %}DEMO EDITION · {% endif %}{{ magazine.publication_date|date:"Y" }}{% if magazine.issue_number %} · NO. {{ magazine.issue_number }}{% endif %}</i></span>{% endif %}
+      </span>
+      <figcaption class="magazine-stage-caption">{% if magazine.issue_number %}ISSUE {{ magazine.issue_number }} · {% endif %}{{ magazine.publication_date|date:"F Y" }}</figcaption>
+    </figure>
+    <div class="magazine-detail-copy">
+      <p class="eyebrow magazine-detail-kicker">{% if magazine.is_featured %}<span class="showcase-label">FEATURED EDITION</span>{% else %}THE GLOBAL ICON · DIGITAL EDITION{% endif %}{% if magazine.access == "members" %}<span class="premium-label">Member edition</span>{% endif %}</p>
+      {% if magazine.category %}<p class="magazine-detail-category">{{ magazine.category.name }}{% if magazine.edition %} · {{ magazine.edition.name }}{% endif %}</p>{% endif %}
+      <h1>{{ magazine.title }}</h1>
+      {% if magazine.subtitle %}<p class="magazine-detail-subtitle">{{ magazine.subtitle }}</p>{% endif %}
+      <span class="magazine-title-rule" aria-hidden="true"></span>
+      <p class="magazine-detail-description">{{ magazine.description|default:"Explore the ideas, people, and perspectives shaping what comes next." }}</p>
+      {% if magazine.slug|slice:":5" == "demo-" %}<p class="demo-label">Demonstration edition</p>{% endif %}
+      <dl class="magazine-detail-metadata">
+        <div><dt>Published</dt><dd>{{ magazine.publication_date|date:"F j, Y" }}</dd></div>
+        {% if magazine.issue_number %}<div><dt>Issue</dt><dd>{{ magazine.issue_number }}</dd></div>{% endif %}
+        <div><dt>Language</dt><dd>{{ magazine.get_language_display }}</dd></div>
+        {% if magazine.edition %}<div><dt>Edition</dt><dd>{{ magazine.edition.name }}{% if magazine.edition.region %} · {{ magazine.edition.region }}{% endif %}</dd></div>{% endif %}
+      </dl>
+      <div class="magazine-detail-actions">
+        {% if magazine.has_pdf %}<a class="button button-dark showcase-action-primary" href="{% url 'magazine_reader' magazine.slug %}"><span aria-hidden="true">◉</span> DIGITAL LIVE <span aria-hidden="true">↗</span></a>{% endif %}
+        {% if related_articles %}<a class="button button-outline showcase-action-secondary" href="{{ related_articles.0.get_absolute_url }}"><span aria-hidden="true">↗</span> WEB LIVE</a>{% endif %}
+        {% if magazine.allow_download and magazine.has_pdf %}<a class="button button-outline" href="{% url 'magazine_pdf' magazine.slug %}?download=1">Download PDF ↓</a>{% endif %}
+        <button class="button button-outline" type="button" data-share-url="{{ request.build_absolute_uri }}" data-share-title="{{ magazine.title }}">Share magazine</button>
+      </div>
+      {% if not magazine.has_pdf %}<p class="preview-unavailable">Preview unavailable. Digital reader unavailable for this issue; cover and publication details are available to explore.</p>{% endif %}
+      {% if translations %}<nav class="translation-links" aria-label="Available translations">Available languages: {% for translated_magazine in translations %}<a href="{{ translated_magazine.get_absolute_url }}">{{ translated_magazine.get_language_display }}</a>{% endfor %}</nav>{% endif %}
+      {% if user.is_authenticated %}<div class="magazine-detail-save">{% if is_saved %}<form action="{% url 'unsave_magazine' magazine.slug %}" method="post">{% csrf_token %}<button class="button button-outline" type="submit">Remove from reading list</button></form>{% else %}<form action="{% url 'save_magazine' magazine.slug %}" method="post">{% csrf_token %}<button class="button button-outline" type="submit">Save edition</button></form>{% endif %}</div>{% endif %}
+      {% ad_slot "magazine_sidebar" %}
+    </div>
+  </div>
+</section>
+{% if featured_leaders %}<section class="section section-tint"><div class="shell"><div class="section-heading"><div><p class="eyebrow">In this issue</p><h2>Featured leaders.</h2></div></div><div class="leader-grid">{% for leader in featured_leaders %}{% include "publications/partials/leader_card.html" with leader=leader %}{% endfor %}</div></div></section>{% endif %}
+{% if related_articles %}<section class="section shell"><div class="section-heading"><div><p class="eyebrow">Related reporting</p><h2>Continue reading.</h2></div></div><div class="story-grid">{% for article in related_articles %}<article class="story-card"><div class="story-meta">{% if article.category %}{{ article.category.name }}{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3><p>{{ article.excerpt|default:article.body|truncatewords:20 }}</p><div class="byline">{% if article.author %}{{ article.author.name }}{% else %}Editorial Desk{% endif %}<span>{{ article.reading_time_minutes }} min read</span></div><a class="text-link" href="{{ article.get_absolute_url }}">Read article ↗</a></article>{% endfor %}</div></div></section>{% endif %}
+{% if related_magazines %}<section class="section section-tint"><div class="shell"><div class="section-heading"><div><p class="eyebrow">More from the archive</p><h2>Related editions.</h2></div><a class="text-link" href="{% url 'magazine_list' %}">Browse all editions ↗</a></div><div class="edition-grid">{% for related in related_magazines %}{% include "publications/partials/magazine_card.html" with magazine=related %}{% endfor %}</div></div></section>{% endif %}
+{% ad_slot "related_magazines" %}
+{% endblock %}
+{% block scripts %}<script>
+  document.querySelector("[data-share-url]")?.addEventListener("click", async (event) => {
+    const button = event.currentTarget;
+    const data = {title: button.dataset.shareTitle, url: button.dataset.shareUrl};
+    try {
+      if (navigator.share) await navigator.share(data);
+      else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(data.url);
+        button.textContent = "Link copied";
+      } else {
+        window.prompt("Copy this magazine link", data.url);
+      }
+    } catch (error) {
+      if (error.name !== "AbortError") console.error("Unable to share magazine link", error);
+    }
+  });
+</script>{% endblock %}

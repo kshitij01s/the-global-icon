@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}My account — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Your account</p><h1>Welcome,<br><em>{{ user.get_short_name|default:user.username }}.</em></h1><p>You are signed in. Member access is assigned by the publication team.</p></section>
+<section class="section section-tint"><div class="shell reader-library">
+  <div class="account-settings-grid">
+    <section class="account-settings-card"><p class="eyebrow">Your details</p><h2>Reader profile</h2><form method="post" action="{% url 'account_profile' %}" class="account-profile-form">{% csrf_token %}{% for field in profile_form %}<label for="{{ field.id_for_label }}">{{ field.label }}{{ field }}</label>{% for error in field.errors %}<span class="form-errors">{{ error }}</span>{% endfor %}{% endfor %}<button class="button button-outline" type="submit">Save profile</button></form></section>
+    <section class="account-settings-card"><p class="eyebrow">Account security</p><h2>Change password</h2><p>Use a unique password to protect your reading library.</p><a class="button button-outline" href="{% url 'password_change' %}">Change password ↗</a></section>
+    <section class="account-settings-card"><p class="eyebrow">Stay in the loop</p><h2>Followed topics</h2><form method="post" action="{% url 'account_preferences' %}" class="topic-preferences-form">{% csrf_token %}<fieldset><legend>Choose categories for recommendations</legend>{% for choice in preference_form.preferred_categories %}<label>{{ choice.tag }} {{ choice.choice_label }}</label>{% empty %}<p>Categories will appear here as they are published.</p>{% endfor %}</fieldset><label class="preference-toggle">{{ preference_form.notify_followed_publications }} Recommend new public editions from followed topics</label><button class="button button-outline" type="submit">Save preferences</button></form></section>
+    <section class="account-settings-card"><p class="eyebrow">Your updates</p><h2>Notifications</h2><p>{% if unread_notifications %}{{ unread_notifications }} unread update{{ unread_notifications|pluralize }}.{% else %}You are all caught up.{% endif %}</p><a class="button button-outline" href="{% url 'account_notifications' %}">View notifications ↗</a></section>
+  </div>
+  <div class="section-heading recent-heading"><div><p class="eyebrow">Your conversations</p><h2>Business enquiries</h2></div><a class="text-link" href="{% url 'client_enquiries' %}">View all <span>↗</span></a></div>
+  <ul class="library-list client-enquiry-list">{% for enquiry in client_enquiries %}<li><a href="{% url 'client_enquiry_detail' enquiry.pk %}">{{ enquiry.reference }} · {{ enquiry.subject }}</a><span>{{ enquiry.get_status_display }} · {{ enquiry.submitted_at|date:"M j, Y" }}</span></li>{% empty %}<li class="library-empty">Enquiries you send while signed in will appear here. <a href="{% url 'contact' %}">Contact our team</a>.</li>{% endfor %}</ul>
+  <div class="section-heading"><div><p class="eyebrow">Your library</p><h2>Saved content</h2></div></div>
+  <div class="library-grid">
+    <section><h3>Stories</h3><ul class="library-list">{% for item in saved_articles %}<li><a href="{{ item.article.get_absolute_url }}">{{ item.article.title }}</a><span>{{ item.created_at|date:"M j, Y" }}</span><form action="{% url 'unsave_article' item.article.slug %}" method="post">{% csrf_token %}<button type="submit">Remove</button></form></li>{% empty %}<li class="library-empty">Save a story to keep it here.</li>{% endfor %}</ul></section>
+    <section><h3>Editions</h3><ul class="library-list">{% for item in saved_magazines %}<li><a href="{{ item.magazine.get_absolute_url }}">{{ item.magazine.title }}</a><span>{{ item.created_at|date:"M j, Y" }}</span><form action="{% url 'unsave_magazine' item.magazine.slug %}" method="post">{% csrf_token %}<button type="submit">Remove</button></form></li>{% empty %}<li class="library-empty">Save an edition to keep it here.</li>{% endfor %}</ul></section>
+  </div>
+  <div class="section-heading recent-heading"><div><p class="eyebrow">Picked up again</p><h2>Recently read</h2></div></div>
+  <div class="library-grid">
+    <section><h3>Stories</h3><ul class="library-list">{% for item in recent_articles %}<li><a href="{{ item.article.get_absolute_url }}">{{ item.article.title }}</a><span>{{ item.last_viewed_at|date:"M j, Y" }}</span></li>{% empty %}<li class="library-empty">Stories you read while signed in will appear here.</li>{% endfor %}</ul></section>
+    <section><h3>Editions</h3><ul class="library-list">{% for item in recent_magazines %}<li><a href="{{ item.magazine.get_absolute_url }}">{{ item.magazine.title }}</a><span>{{ item.last_viewed_at|date:"M j, Y" }}</span>{% if item.magazine.has_pdf %}<a class="library-continue" href="{{ item.magazine.get_reader_url }}">Continue from page {{ item.last_page }}</a>{% endif %}</li>{% empty %}<li class="library-empty">Editions you open while signed in will appear here.</li>{% endfor %}</ul></section>
+  </div>
+</div></section>
+{% endblock %}

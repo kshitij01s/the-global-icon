@@ -1,0 +1,15 @@
+<article class="leader-card">
+  <a class="leader-card-cover leader-cover-{{ leader.category.slug|default:'leadership' }}" href="{{ leader.get_absolute_url }}" aria-label="Read the feature about {{ leader.name }}">
+    {% if leader.magazine and leader.magazine.has_cover %}<img src="{{ leader.magazine.cover.url }}" alt="{{ leader.magazine.cover_alt_text|default:'Cover of '|add:leader.magazine.title }}" loading="lazy" width="360" height="480">
+    {% elif leader.article and leader.article.has_featured_image %}<img src="{{ leader.article.featured_image.url }}" alt="" loading="lazy" width="360" height="480">
+    {% elif leader.has_portrait %}<img src="{{ leader.portrait.url }}" alt="Portrait of {{ leader.name }}" loading="lazy" width="360" height="480">
+    {% else %}<span class="leader-initials" aria-hidden="true">{{ leader.name|slice:":1" }}</span>{% endif %}
+    {% if leader.magazine and leader.magazine.access == "members" %}<span class="cover-access">Member feature</span>{% endif %}
+  </a>
+  <p class="eyebrow">{{ leader.publication_date|date:"Y" }}{% if leader.category %} · {{ leader.category.name }}{% endif %}</p>
+  {% if leader.slug|slice:":5" == "demo-" %}<p class="demo-label">Fictional demonstration profile</p>{% endif %}
+  <h3><a href="{{ leader.get_absolute_url }}">{{ leader.name }}</a></h3>
+  {% if leader.designation %}<p class="leader-role">{{ leader.designation }}{% if leader.organization %}<span> · {{ leader.organization }}</span>{% endif %}</p>{% elif leader.organization %}<p class="leader-role">{{ leader.organization }}</p>{% endif %}
+  <p class="leader-feature-title">{% if leader.article %}{{ leader.article.title }}{% elif leader.magazine %}{{ leader.magazine.title }}{% endif %}</p>
+  <a class="text-link" href="{{ leader.get_absolute_url }}">Read feature <span>↗</span></a>
+</article>

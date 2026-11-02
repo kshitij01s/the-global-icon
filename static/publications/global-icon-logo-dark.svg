@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 112" role="img">
+  <g transform="translate(5 8)">
+    <circle cx="48" cy="48" r="43" fill="none" stroke="#A9874B" stroke-width="2.2"/>
+    <ellipse cx="48" cy="48" rx="19" ry="43" fill="none" stroke="#397C80" stroke-width="1.6"/>
+    <ellipse cx="48" cy="48" rx="43" ry="17" fill="none" stroke="#397C80" stroke-width="1.6"/>
+    <path d="M12 48h72M48 5v86" fill="none" stroke="#101827" stroke-opacity=".65" stroke-width="1"/>
+    <path d="M21 27c8-11 20-17 33-16L48 20l-8 2-4 9-9 3zm24-10 11-7 11 4 2 7-11 3-5 8-8-4zm8 27 9-7 11 5 1 11-8 7-3 15-8 8-7-11 3-12-5-7zm-25-3 12 4 2 10-7 8-8-4-8-10z" fill="#A9874B"/>
+    <circle cx="48" cy="48" r="48" fill="none" stroke="#A9874B" stroke-width=".7" stroke-dasharray="1 4"/>
+  </g>
+  <text x="112" y="51" fill="#101827" font-family="Georgia, 'Times New Roman', serif" font-size="12" font-weight="700" letter-spacing="3.3">THE</text>
+  <text x="111" y="82" fill="#101827" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="1.1">GLOBAL <tspan fill="#A9874B">ICON</tspan></text>
+  <path d="M113 90h272" stroke="#A9874B" stroke-opacity=".8" stroke-width=".8"/>
+  <text x="114" y="105" fill="#657181" font-family="Georgia, 'Times New Roman', serif" font-size="10.5" font-style="italic" letter-spacing=".7">Stories That Shape Tomorrow.</text>
+</svg>

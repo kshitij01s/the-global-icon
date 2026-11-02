@@ -1,0 +1,26 @@
+<section class="magazine-wall" id="magazine-wall" aria-labelledby="magazine-wall-heading">
+  <div class="magazine-wall-art" aria-hidden="true">
+    {% for row in magazine_wall_rows %}
+    <div class="magazine-wall-row" data-direction="{{ row.direction }}" style="--wall-top:{{ row.top }}%;--wall-duration:{{ row.duration }}s;--wall-delay:-{{ row.delay }}s;--wall-shift:{{ row.shift }}px">
+      <div class="magazine-wall-track">
+        {% for copy in "12" %}
+        <div class="magazine-wall-sequence">
+          {% for magazine in wall_magazines %}
+          <div class="magazine-wall-tile">
+            {% if magazine.has_cover %}<img src="{{ magazine.cover.url }}" alt="" width="360" height="480" loading="lazy">{% else %}<div class="cover-art cover-art-{{ magazine.category.slug|default:'business' }}"><span>THE GLOBAL ICON</span><strong>{{ magazine.title }}</strong><i>EDITION · {{ magazine.publication_date|date:"Y" }}</i></div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="magazine-wall-shade" aria-hidden="true"></div>
+  <div class="shell magazine-wall-content">
+    <p class="eyebrow">The Global Icon collection</p>
+    <h2 id="magazine-wall-heading">EDITIONS</h2>
+    <p>Original perspectives on business, leadership, technology and the people shaping tomorrow.</p>
+    <a class="button button-red" href="#edition-filters">Explore all editions <span aria-hidden="true">↗</span></a>
+  </div>
+</section>

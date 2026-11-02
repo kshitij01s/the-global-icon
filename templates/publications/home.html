@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+{% load advertising %}
+{% block title %}THE GLOBAL ICON — Stories That Shape Tomorrow.{% endblock %}
+{% block meta_description %}Discover the people, ideas, and innovations shaping our world through original stories and magazine editions.{% endblock %}
+{% block og_title %}THE GLOBAL ICON — Stories That Shape Tomorrow.{% endblock %}
+{% block og_description %}{{ config.hero_copy|default:"Stories That Shape Tomorrow." }}{% endblock %}
+{% block content %}
+{% if ticker_articles %}
+<section class="news-ticker" aria-label="Latest news">
+  <div class="news-ticker-label"><span class="ticker-dot" aria-hidden="true">•</span> LATEST NEWS</div>
+  <div class="news-ticker-window">
+    <div class="news-ticker-track">
+      {% for copy in "12" %}
+      <div class="news-ticker-sequence"{% if forloop.counter == 2 %} aria-hidden="true"{% endif %}>
+        {% for article in ticker_articles %}
+        <a{% if forloop.parentloop.counter == 2 %} tabindex="-1"{% endif %} href="{{ article.get_absolute_url }}">{{ article.title }}</a>
+        {% if not forloop.last %}<span class="ticker-separator" aria-hidden="true">•</span>{% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="news-ticker-controls" aria-hidden="true">
+    <button class="news-ticker-btn news-ticker-btn-prev" type="button" aria-label="Previous headline">‹</button>
+    <button class="news-ticker-btn news-ticker-btn-next" type="button" aria-label="Next headline">›</button>
+  </div>
+  <button class="news-ticker-toggle" type="button" aria-pressed="false" aria-label="Pause latest news ticker">Pause</button>
+</section>
+{% endif %}
+
+<section class="global-icon-hero" aria-labelledby="global-icon-heading">
+  <div class="global-icon-hero-bg-wrap" aria-hidden="true">
+    <img class="global-icon-hero-bg-img" src="{% static 'publications/global-icon-hero-bg.jpg' %}" alt="" fetchpriority="high" width="1920" height="1072">
+    <div class="global-icon-hero-vignette"></div>
+  </div>
+
+  <div class="global-icon-hero-content">
+    <h1 id="global-icon-heading" class="hero-brand-heading" aria-label="THE GLOBAL ICON">
+      <span class="hero-title-the">THE</span>
+      <span class="hero-title-brand">
+        <span class="hero-title-global">GLOBAL</span>
+        <span class="hero-title-icon">ICON</span>
+      </span>
+    </h1>
+    <p class="global-icon-hero-tagline"><em>Stories That Shape Tomorrow.</em></p>
+    <div class="global-icon-hero-actions">
+      <a class="hero-btn hero-btn-red" href="{% url 'magazine_list' %}#edition-filters">
+        EXPLORE EDITIONS <span class="hero-btn-arrow" aria-hidden="true">→</span>
+      </a>
+      <a class="hero-btn hero-btn-outline" href="{% url 'search' %}">
+        DISCOVER MORE <span class="hero-btn-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><polygon points="10,8 16.5,12 10,16" fill="currentColor"/></svg></span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="global-icon-feature-cards" aria-label="Explore THE GLOBAL ICON">
+    <a class="global-icon-feature-card" href="{% url 'magazine_list' %}#edition-filters">
+      <div class="feature-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5z"/>
+          <path d="M6 6h10M6 10h10M6 14h6"/>
+        </svg>
+      </div>
+      <span class="global-icon-feature-copy">
+        <strong>EDITIONS</strong>
+        <small>Explore Our Latest Publications</small>
+      </span>
+      <span class="global-icon-feature-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a class="global-icon-feature-card" href="{% url 'article_list' %}">
+      <div class="feature-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="13" x2="16" y2="13"/>
+          <line x1="8" y1="17" x2="14" y2="17"/>
+        </svg>
+      </div>
+      <span class="global-icon-feature-copy">
+        <strong>STORIES</strong>
+        <small>Inspiring Stories from Around the World</small>
+      </span>
+      <span class="global-icon-feature-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a class="global-icon-feature-card" href="{% url 'leader_list' %}">
+      <div class="feature-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <span class="global-icon-feature-copy">
+        <strong>LEADERS</strong>
+        <small>Visionary Minds. Global Impact.</small>
+      </span>
+      <span class="global-icon-feature-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a class="global-icon-feature-card" href="{% url 'search' %}">
+      <div class="feature-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        </svg>
+      </div>
+      <span class="global-icon-feature-copy">
+        <strong>DISCOVER</strong>
+        <small>Ideas. Trends. Opportunities.</small>
+      </span>
+      <span class="global-icon-feature-arrow" aria-hidden="true">→</span>
+    </a>
+
+    <a class="global-icon-feature-card" href="{% url 'contact' %}">
+      <div class="feature-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </div>
+      <span class="global-icon-feature-copy">
+        <strong>CONTACT</strong>
+        <small>Get in Touch With Our Team</small>
+      </span>
+      <span class="global-icon-feature-arrow" aria-hidden="true">→</span>
+    </a>
+  </nav>
+</section>
+
+{% if header_categories %}
+<nav class="category-nav home-category-nav" aria-label="Browse by category">
+  <a href="{% url 'magazine_list' %}#edition-filters">Cover stories</a>
+  <a href="{% url 'article_list' %}">Latest news</a>
+  {% for category in header_categories %}<a href="{% url 'article_list' %}?category={{ category.slug }}">{{ category.name }}</a>{% endfor %}
+  <a href="{% url 'leader_list' %}">Visionary leaders</a>
+</nav>
+{% endif %}
+
+{% ad_slot "homepage_banner" %}
+
+{% if leaders %}
+<section class="leaders-home-section">
+  <div class="leaders-banner"><div class="shell"><p class="eyebrow">People shaping what comes next</p><h2>Featured leaders</h2><p>Conversations and perspectives from the people moving their industries forward.</p><a href="{% url 'leader_list' %}">Meet the leaders <span>↗</span></a></div></div>
+  <div class="shell leader-grid leader-grid-home">{% for leader in leaders %}{% include "publications/partials/leader_card.html" with leader=leader %}{% endfor %}</div>
+</section>
+{% endif %}
+
+{% if carousel_magazines %}
+<section class="section carousel-section">
+  <div class="shell"><div class="section-heading"><div><p class="eyebrow">The magazine</p><h2>Stories, in every issue.</h2></div><div class="carousel-controls"><button type="button" data-carousel-prev="editions" aria-label="Previous editions">←</button><span data-carousel-status="editions" aria-live="polite">1 / {{ carousel_magazines|length }}</span><button type="button" data-carousel-next="editions" aria-label="Next editions">→</button></div></div>
+  <div class="carousel-track" id="editions-carousel" data-carousel="editions" tabindex="0">{% for magazine in carousel_magazines %}{% include "publications/partials/magazine_card.html" with magazine=magazine %}{% endfor %}</div>
+  <div class="carousel-pagination" data-carousel-dots="editions" aria-label="Choose an edition"></div></div>
+</section>
+{% endif %}
+
+{% if homepage_sections %}
+{% for section in homepage_sections %}
+{% with stories=section.selected_articles|default:section.category.homepage_articles %}
+{% if stories %}
+<section class="section dispatch-section {% cycle '' 'section-tint' as dispatch_tint %}">
+  <div class="shell"><div class="section-heading"><div><p class="eyebrow">Dispatches · {{ section.category.name }}</p><h2>{{ section.title }}</h2>{% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}</div><a class="text-link" href="{% url 'article_list' %}?category={{ section.category.slug }}">View all <span>↗</span></a></div>
+    <div class="story-grid">{% for article in stories %}<article class="story-card"><a class="story-image" href="{{ article.get_absolute_url }}">{% if article.has_featured_image %}<img src="{{ article.featured_image.url }}" alt="" loading="lazy" width="480" height="300">{% else %}<span class="story-image-mark">{{ section.category.name|slice:":1" }}</span>{% endif %}</a><div class="story-meta">{{ section.category.name }}{% if article.is_sponsored %}<span class="sponsored-label">Sponsored</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3><p>{{ article.excerpt|default:article.body|truncatewords:18 }}</p><div class="byline">{% if article.author %}{{ article.author.name }}{% else %}Editorial Desk{% endif %}<span>{{ article.published_at|date:"M j, Y" }} · {{ article.reading_time_minutes }} min read</span></div></article>{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+{% endwith %}
+{% if forloop.counter == 1 %}{% ad_slot "between_sections" %}{% endif %}
+{% endfor %}
+{% elif featured_article and articles %}
+<section class="section section-tint"><div class="shell"><div class="section-heading"><div><p class="eyebrow">The journal</p><h2>Stories with a point of view.</h2></div><a class="text-link" href="{% url 'article_list' %}">All stories <span>↗</span></a></div><div class="story-grid">{% for article in articles %}<article class="story-card"><a class="story-image" href="{{ article.get_absolute_url }}">{% if article.has_featured_image %}<img src="{{ article.featured_image.url }}" alt="" loading="lazy" width="480" height="300">{% else %}<span class="story-image-mark">T</span>{% endif %}</a><div class="story-meta">{% if article.category %}{{ article.category.name }}{% else %}Journal{% endif %}{% if article.is_sponsored %}<span class="sponsored-label">Sponsored</span>{% endif %}</div><h3><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3><p>{{ article.excerpt|default:article.body|truncatewords:18 }}</p><div class="byline">{% if article.author %}{{ article.author.name }}{% else %}Editorial Desk{% endif %}<span>{{ article.published_at|date:"M j, Y" }} · {{ article.reading_time_minutes }} min read</span></div></article>{% empty %}<div class="empty-state"><p>Good stories take time.</p><span>Published articles will be featured here.</span></div>{% endfor %}</div></div></section>
+{% endif %}
+
+{% if recommended_magazines %}
+<section class="section section-tint">
+  <div class="shell">
+    <div class="section-heading"><div><p class="eyebrow">From topics you follow</p><h2>Selected for you.</h2></div><a class="text-link" href="{% url 'account_preferences' %}">Edit your topics <span>↗</span></a></div>
+    <div class="edition-grid">{% for magazine in recommended_magazines %}{% include "publications/partials/magazine_card.html" with magazine=magazine %}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+{% has_eligible_ad "homepage_sidebar" as has_homepage_sidebar_ad %}
+{% if has_homepage_sidebar_ad %}<section class="home-sidebar-band"><div class="shell"><div><p class="eyebrow">Sponsored perspective</p><h2>Ideas that move business forward.</h2><p>Partner messages are clearly separated from editorial reporting.</p></div>{% ad_slot "homepage_sidebar" %}</div></section>{% endif %}
+
+{% if partners %}
+<section class="partner-strip"><div class="shell"><p class="eyebrow">In conversation with</p><div class="partner-list">{% for partner in partners %}{% if partner.website_url %}<a href="{{ partner.website_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ partner.name }} (opens in a new tab)">{% else %}<span>{% endif %}{% if partner.logo %}<img src="{{ partner.logo.url }}" alt="{{ partner.name }}" loading="lazy" width="160" height="60">{% else %}<strong>{{ partner.name }}</strong>{% endif %}{% if partner.website_url %}</a>{% else %}</span>{% endif %}{% endfor %}</div></div></section>
+{% endif %}
+{% ad_slot "featured_partner" %}
+
+<section class="contact-promo"><div class="shell contact-promo-inner"><div><p class="eyebrow">For brands, publishers and people with a story</p><h2>Let's build something exceptional together.</h2><p>Interested in advertising, magazine features, publishing partnerships, or collaborating with our team? Tell us how we can help.</p></div><a class="button button-dark" href="{% url 'contact' %}">Talk with our team <span aria-hidden="true">↗</span></a></div></section>
+
+{% ad_slot "newsletter" %}
+<section class="newsletter-section" id="newsletter"><div class="shell newsletter-inner"><div><p class="eyebrow">The Sunday Edit</p><h2>{{ config.newsletter_heading }}</h2><p>{{ config.newsletter_copy }}</p></div><form class="newsletter-form" action="{% url 'newsletter_signup' %}" method="post">{% csrf_token %}<label class="visually-hidden" for="newsletter-email">Email address</label><div class="newsletter-input"><input id="newsletter-email" type="email" name="email" required placeholder="Your email address" autocomplete="email"><button type="submit" aria-label="Subscribe to newsletter">↗</button></div><label class="consent"><input type="checkbox" name="consent" required> I agree to receive editorial emails. Unsubscribe anytime.</label></form></div></section>
+{% if newsletter_unsubscribe_token %}<p class="unsubscribe-shortcut shell">Manage your newsletter subscription: <a href="{% url 'newsletter_unsubscribe' newsletter_unsubscribe_token %}">unsubscribe here</a>.</p>{% endif %}
+{% endblock %}

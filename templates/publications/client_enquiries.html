@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Your enquiries — THE GLOBAL ICON{% endblock %}
+{% block content %}
+<section class="page-intro shell"><p class="eyebrow">Your account</p><h1>Your business<br><em>enquiries.</em></h1><p>Only enquiries submitted while signed in to this account appear here.</p></section>
+<section class="section shell">
+  <div class="management-table-wrap"><table class="management-table"><thead><tr><th>Reference</th><th>Subject</th><th>Type</th><th>Status</th><th>Submitted</th></tr></thead><tbody>
+    {% for enquiry in page %}<tr><td>{{ enquiry.reference }}</td><td><a href="{% url 'client_enquiry_detail' enquiry.pk %}">{{ enquiry.subject }}</a></td><td>{{ enquiry.get_enquiry_type_display }}</td><td>{{ enquiry.get_status_display }}</td><td>{{ enquiry.submitted_at|date:"M j, Y" }}</td></tr>
+    {% empty %}<tr><td colspan="5"><div class="empty-state"><p>No enquiries yet.</p><span><a href="{% url 'contact' %}">Contact our team</a> to start a conversation.</span></div></td></tr>{% endfor %}
+  </tbody></table></div>
+  {% include "publications/pagination.html" with page=page %}
+</section>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% block title %}Advertising report{% endblock %}
+{% block content %}
+<div id="content-main">
+  <h1>Advertising report</h1>
+  <p>Counts are total recorded events, not unique visitors. No visitor identifiers are stored.</p>
+  <table>
+    <thead><tr><th>Campaign</th><th>Advertiser</th><th>Placement</th><th>Impressions</th><th>Clicks</th><th>Click-through rate</th></tr></thead>
+    <tbody>
+      {% for row in report_rows %}
+      <tr>
+        <th><a href="{% url 'admin:publications_advertisement_change' row.advertisement.pk %}">{{ row.advertisement.title }}</a>{% if row.advertisement.campaign_identifier %}<br><small>{{ row.advertisement.campaign_identifier }}</small>{% endif %}</th>
+        <td>{{ row.advertisement.advertiser }}{% if row.advertisement.is_demo %}<br><strong>Fictional demo</strong>{% endif %}</td>
+        <td>{{ row.advertisement.get_placement_display }}</td>
+        <td>{{ row.impressions }}</td>
+        <td>{{ row.clicks }}</td>
+        <td>{% if row.click_through_rate is not None %}{{ row.click_through_rate }}%{% else %}—{% endif %}</td>
+      </tr>
+      {% empty %}<tr><td colspan="6">No campaigns have been configured.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 820" role="img">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#05080f"/>
+      <stop offset=".47" stop-color="#172a38"/>
+      <stop offset=".79" stop-color="#263b45"/>
+      <stop offset="1" stop-color="#090b11"/>
+    </linearGradient>
+    <linearGradient id="water" x2="0" y2="1">
+      <stop stop-color="#203343"/>
+      <stop offset=".25" stop-color="#15131a"/>
+      <stop offset="1" stop-color="#05080e"/>
+    </linearGradient>
+    <linearGradient id="building" x2="0" y2="1">
+      <stop stop-color="#1b222e"/>
+      <stop offset="1" stop-color="#080c13"/>
+    </linearGradient>
+    <radialGradient id="city-glow">
+      <stop stop-color="#397c80" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#397c80" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="windows" width="30" height="36" patternUnits="userSpaceOnUse">
+      <path d="M8 9h6v12H8zM21 25h4v4h-4z" fill="#c7a76c" opacity=".72"/>
+    </pattern>
+    <pattern id="water-lines" width="116" height="36" patternUnits="userSpaceOnUse">
+      <path d="M5 8h42m24 13h35m-75 11h20" stroke="#73b3ad" stroke-opacity=".32" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1920v820H0z"/>
+  <ellipse cx="1120" cy="446" rx="700" ry="310" fill="url(#city-glow)"/>
+  <g fill="#e1a3a0" opacity=".7">
+    <circle cx="146" cy="94" r="2"/><circle cx="297" cy="160" r="2"/>
+    <circle cx="498" cy="67" r="1.5"/><circle cx="756" cy="124" r="2"/>
+    <circle cx="1018" cy="71" r="1.5"/><circle cx="1284" cy="159" r="2"/>
+    <circle cx="1650" cy="91" r="2"/><circle cx="1813" cy="176" r="1.5"/>
+    <circle cx="929" cy="183" r="1.5"/><circle cx="545" cy="199" r="2"/>
+  </g>
+  <path d="M0 510c245-54 419-74 614-54 185 18 287-34 474-37 233-4 435 51 832 11v133H0z" fill="#161925" opacity=".8"/>
+  <g fill="url(#building)" stroke="#39404a" stroke-opacity=".35">
+    <path d="M0 440h82V294h64v146h31v-94h69v94h26V326h83v114h26V237h91v203h35V350h74v90h35V275h61v165h35V317h101v123h28V219h105v221h36V294h78v146h30V254h106v186h34V332h65v108h33V287h101v153h37v-91h70v91h54V331h113v109h66V305h81v135h35V362h93v78h54V349h111v91h24v204H0z"/>
+    <path d="M966 442V181h39V127h30V73h22v54h30v54h39v261M1477 440V212l34-36 34 36v228"/>
+  </g>
+  <g fill="url(#windows)" opacity=".72">
+    <path d="M0 440h82V294h64v146h31v-94h69v94h26V326h83v114h26V237h91v203h35V350h74v90h35V275h61v165h35V317h101v123h28V219h105v221h36V294h78v146h30V254h106v186h34V332h65v108h33V287h101v153h37v-91h70v91h54V331h113v109h66V305h81v135h35V362h93v78h54V349h111v91h24v204H0z"/>
+  </g>
+  <g fill="none" stroke="#c7a76c" stroke-opacity=".38">
+    <path d="M0 435h1920M0 472h1920"/>
+    <path d="M335 440v67m540-89v89m339-92v92m422-78v78" stroke-width="3"/>
+  </g>
+  <path fill="url(#water)" d="M0 536h1920v284H0z"/>
+  <path fill="url(#water-lines)" opacity=".58" d="M0 538h1920v282H0z"/>
+  <g fill="none" stroke="#73b3ad" stroke-opacity=".48">
+    <path d="M154 560h130l-44 4H169zm307 23h173l-95 4h-60zm529-31h228l-140 5h-45zm426 25h241l-94 4h-73zm-1109 69h246l-158 5h-50zm848 18h298l-195 5h-54zm-572 53h207l-131 5h-42z" stroke-width="3"/>
+  </g>
+  <path d="M0 708c245-24 409 17 608 0s392-28 602-5 462 19 710-8v133H0z" fill="#060911" opacity=".66"/>
+</svg>

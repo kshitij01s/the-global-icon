@@ -1,0 +1,12 @@
+<article class="carousel-card">
+  <a class="carousel-cover" href="{{ magazine.get_absolute_url }}" aria-label="View {{ magazine.title }}">
+    {% if magazine.has_cover %}<img src="{{ magazine.cover.url }}" alt="{{ magazine.cover_alt_text|default:'Cover of '|add:magazine.title }}" loading="lazy" width="360" height="480">{% else %}<div class="cover-art cover-art-{{ magazine.category.slug|default:'business' }}"><span>THE GLOBAL ICON</span><strong>{{ magazine.title }}</strong>{% if magazine.subtitle %}<small>{{ magazine.subtitle }}</small>{% endif %}<i>{% if magazine.slug|slice:":5" == "demo-" %}DEMO EDITION · {% endif %}{{ magazine.publication_date|date:"Y" }}{% if magazine.issue_number %} · NO. {{ magazine.issue_number }}{% endif %}</i></div>{% endif %}
+    {% if magazine.access == "members" %}<span class="cover-access">Member edition</span>{% endif %}
+  </a>
+  <p class="eyebrow">{{ magazine.publication_date|date:"F Y" }}{% if magazine.edition %} · {{ magazine.edition.name }}{% endif %}</p>
+  {% if magazine.slug|slice:":5" == "demo-" %}<p class="demo-label">Demonstration edition</p>{% endif %}
+  <h3><a href="{{ magazine.get_absolute_url }}">{{ magazine.title }}</a></h3>
+  {% if magazine.subtitle %}<p class="carousel-subtitle">{{ magazine.subtitle }}</p>{% endif %}
+  <a class="text-link" href="{{ magazine.get_absolute_url }}">View edition <span>↗</span></a>
+  {% if magazine.has_pdf %}<a class="text-link" href="{% url 'magazine_reader' magazine.slug %}">Read magazine <span>↗</span></a>{% endif %}
+</article>

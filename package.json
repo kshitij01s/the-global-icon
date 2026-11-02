@@ -1,0 +1,22 @@
+﻿{
+  "name": "the-global-icon",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run start:dev -w @tgi/api",
+    "dev:web": "npm run dev -w @tgi/public-web",
+    "dev:admin": "npm run start -w @tgi/admin-dashboard",
+    "build": "npm run build -w @tgi/api -w @tgi/public-web -w @tgi/admin-dashboard",
+    "test": "npm run test -w @tgi/api --if-present && npm run test -w @tgi/public-web --if-present",
+    "db:migrate": "npm run prisma:migrate -w @tgi/api",
+    "db:seed": "npm run prisma:seed -w @tgi/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
+
