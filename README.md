@@ -53,6 +53,15 @@ npm run dev:web     # http://localhost:5173
 npm run dev:admin   # http://localhost:4200
 ```
 
+Staff login from the public site redirects Admin / Super Admin to the Angular console. Shared auth details: [docs/AUTHENTICATION_AND_ROLE_ACCESS.md](docs/AUTHENTICATION_AND_ROLE_ACCESS.md) · [docs/LOCAL_DEVELOPMENT_SETUP.md](docs/LOCAL_DEVELOPMENT_SETUP.md).
+
+Reset local staff accounts (writes gitignored credentials file):
+
+```powershell
+cd apps\api
+node scripts\reset-staff-users.js
+```
+
 ### Environment variables (API)
 
 Configure privately in `apps/api/.env` (never commit):

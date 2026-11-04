@@ -135,19 +135,37 @@ export class AuthService {
     return this.refreshInFlight$;
   }
 
-  /** Runs before the app boots: validates a stored token, silently refreshing it if needed. */
+  /**
+   * Runs before the app boots.
+   * - If we already have an access token, validate via /auth/me.
+   * - If not, attempt cookie refresh so a login from the public React site
+   *   (shared httpOnly refresh cookie on the API host) opens the dashboard.
+   */
   initialize(): Observable<unknown> {
-    if (!this.tokenSig()) return of(null);
+    if (!this.tokenSig()) {
+      return this.refreshSession().pipe(map(() => null));
+    }
     return this.http
       .get<{ user: AuthUser }>(`${this.base}/auth/me`, {
         context: new HttpContext().set(SILENT_AUTH, true),
       })
       .pipe(
-        tap((res) => this.setUser(res.user)),
-        catchError(() => {
-          this.clearSession();
-          return of(null);
+        tap((res) => {
+          if (!isStaff(res.user)) {
+            this.clearSession();
+            return;
+          }
+          this.setUser(res.user);
         }),
+        catchError(() =>
+          this.refreshSession().pipe(
+            map(() => null),
+            catchError(() => {
+              this.clearSession();
+              return of(null);
+            }),
+          ),
+        ),
       );
   }
 

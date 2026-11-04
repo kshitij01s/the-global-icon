@@ -66,7 +66,12 @@ export default function Contact() {
     <div className="mood-ivory">
       <div className="grid min-h-[calc(100vh-72px)] lg:grid-cols-[0.8fr_1.2fr]">
         <aside className="mood-navy relative overflow-hidden px-6 py-16 md:px-14 md:py-24">
-          <img src="/brand/globe.svg" alt="" aria-hidden className="pointer-events-none absolute -right-24 -bottom-24 w-[28rem] opacity-25" />
+          <img
+            src="/brand/globe.svg"
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute right-0 bottom-0 w-[min(22rem,70%)] max-w-full opacity-25"
+          />
           <div className="relative">
             <p className="eyebrow mb-5">{cms.eyebrow ?? 'Contact'}</p>
             <h1 className="display text-5xl md:text-7xl">

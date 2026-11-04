@@ -89,25 +89,42 @@ function applyTokens(tokens: ThemeTokens) {
   }
 }
 
-function applyReaderMode(mode: ReaderMode, allowed: boolean, themeMode: string | undefined) {
+/**
+ * Reader preference adjusts reading surfaces without wiping brand tokens.
+ * Always re-apply active tokens first so Light→Dark does not leave stale overrides.
+ */
+function applyReaderMode(
+  mode: ReaderMode,
+  allowed: boolean,
+  tokens: ThemeTokens | undefined,
+) {
   const root = document.documentElement
+  if (tokens) applyTokens(tokens)
   if (!allowed) {
     root.dataset.readerMode = 'off'
     return
   }
-  let resolved = mode
+  let resolved: 'light' | 'dark' = mode === 'light' || mode === 'dark' ? mode : 'dark'
   if (mode === 'system') {
     resolved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
   }
-  if (resolved === 'light' && themeMode !== 'light') {
+  const themeMode = tokens?.['theme-mode']
+  if (resolved === 'light') {
     root.style.setProperty('--color-paper', '#fcfaf5')
     root.style.setProperty('--color-ivory', '#1a1d24')
     root.style.setProperty('--color-ink', '#12151c')
-  }
-  if (resolved === 'dark' && themeMode === 'light') {
+    root.style.setProperty('--color-midnight', '#f7f4ec')
+    root.style.setProperty('--color-navy', '#efe8d8')
+    root.style.setProperty('--color-charcoal', '#f3eee3')
+    if (themeMode !== 'light') {
+      root.dataset.themeMode = 'light'
+    }
+  } else if (themeMode === 'light') {
+    // Prefer dark reading surfaces when the active brand theme is light
     root.style.setProperty('--color-paper', '#0b0f16')
     root.style.setProperty('--color-ivory', '#f5eedf')
     root.style.setProperty('--color-ink', '#f5eedf')
+    root.dataset.themeMode = 'dark'
   }
   root.dataset.readerMode = resolved
 }
@@ -130,10 +147,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error('theme fetch failed')
       const data = (await res.json()) as ActiveTheme
       setActive(data)
-      applyTokens(data.tokens)
       document.documentElement.dataset.theme = data.slug
       document.documentElement.dataset.themeSource = data.source
-      applyReaderMode(readerMode, data.allowReaderPreference, data.tokens['theme-mode'])
+      applyReaderMode(readerMode, data.allowReaderPreference, data.tokens)
     } catch {
       setActive(null)
     } finally {
@@ -147,12 +163,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(id)
   }, [refresh])
 
+  useEffect(() => {
+    if (readerMode !== 'system') return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const onChange = () => {
+      if (active) applyReaderMode('system', active.allowReaderPreference, active.tokens)
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [readerMode, active])
+
   const setReaderMode = useCallback(
     (mode: ReaderMode) => {
       setReaderModeState(mode)
       localStorage.setItem(STORAGE_KEY, mode)
       if (active) {
-        applyReaderMode(mode, active.allowReaderPreference, active.tokens['theme-mode'])
+        applyReaderMode(mode, active.allowReaderPreference, active.tokens)
       }
     },
     [active],

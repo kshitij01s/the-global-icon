@@ -1,15 +1,28 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, Moon, Rss, Search, Sun, X } from 'lucide-react'
+import { Menu, Monitor, Moon, Rss, Search, Sun, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { RSS_URL, api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useAsync } from '../lib/hooks'
+import { adminConsoleUrl, isStaffUser } from '../lib/staff'
 import { useTheme } from '../lib/theme'
 import FestivalEffects from './FestivalEffects'
 import { SearchResultsView } from './SearchPanel'
 
+/** Primary desktop nav — Editions lives under Magazines mega to prevent overflow. */
 const NAV: { to: string; label: string; end?: boolean }[] = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/magazines', label: 'Magazines' },
+  { to: '/stories', label: 'Stories' },
+  { to: '/leaders', label: 'Leaders' },
+  { to: '/discover', label: 'Discover' },
+  { to: '/advertise', label: 'Advertise' },
+  { to: '/about', label: 'About' },
+  { to: '/contact', label: 'Contact' },
+]
+
+const MOBILE_NAV: { to: string; label: string; end?: boolean }[] = [
   { to: '/', label: 'Home', end: true },
   { to: '/editions', label: 'Editions' },
   { to: '/magazines', label: 'Magazines' },
@@ -137,6 +150,7 @@ function Header({ onSearch }: { onSearch: () => void }) {
   const [open, setOpen] = useState(false)
   const { user, signOut } = useAuth()
   const location = useLocation()
+  const staff = isStaffUser(user)
 
   useEffect(() => setOpen(false), [location.pathname])
   useEffect(() => {
@@ -148,8 +162,8 @@ function Header({ onSearch }: { onSearch: () => void }) {
 
   return (
     <header className="site-header">
-      <div className="container-x flex min-h-[4.75rem] items-center justify-between gap-4 py-2 md:min-h-[5.25rem]">
-        <Link to="/" aria-label="THE GLOBAL ICON — home" className="brand-lockup shrink-0">
+      <div className="container-x flex min-h-[4.25rem] items-center justify-between gap-3 py-2 md:min-h-[4.75rem]">
+        <Link to="/" aria-label="THE GLOBAL ICON — home" className="brand-lockup min-w-0 shrink">
           <img src="/brand/logo-light.svg" alt="" className="brand-mark-img" aria-hidden />
           <span className="brand-copy">
             <span className="brand-name">THE GLOBAL ICON</span>
@@ -157,7 +171,7 @@ function Header({ onSearch }: { onSearch: () => void }) {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-3 2xl:gap-4 xl:flex" aria-label="Primary">
+        <nav className="header-desktop-nav hidden min-w-0 items-center gap-1.5 2xl:gap-2.5 2xl:flex" aria-label="Primary">
           {NAV.map((n) => {
             if (n.to === '/magazines') {
               return (
@@ -211,13 +225,27 @@ function Header({ onSearch }: { onSearch: () => void }) {
               </NavLink>
             )
           })}
-          <button type="button" className="nav-link inline-flex items-center gap-1.5" onClick={onSearch}>
-            <Search size={14} aria-hidden /> Search
+          <button type="button" className="nav-link inline-flex items-center gap-1" onClick={onSearch} aria-label="Search">
+            <Search size={14} aria-hidden />
+            <span className="hidden 2xl:inline">Search</span>
           </button>
-          <ReaderThemeToggle />
-          <a className="nav-link inline-flex items-center gap-1.5" href={RSS_URL} target="_blank" rel="noreferrer" title="RSS 2.0 stories feed">
-            <Rss size={14} aria-hidden /> RSS
+          <ReaderThemeToggle compact />
+          <a
+            className="nav-link inline-flex items-center gap-1"
+            href={RSS_URL}
+            target="_blank"
+            rel="noreferrer"
+            title="RSS 2.0 stories feed"
+            aria-label="RSS feed"
+          >
+            <Rss size={14} aria-hidden />
+            <span className="hidden 2xl:inline">RSS</span>
           </a>
+          {staff && (
+            <a className="nav-link text-gold" href={adminConsoleUrl()} title="Open Admin console">
+              Admin
+            </a>
+          )}
           {user ? (
             <button
               type="button"
@@ -234,59 +262,62 @@ function Header({ onSearch }: { onSearch: () => void }) {
           )}
         </nav>
 
-        <button
-          type="button"
-          className="icon-btn xl:hidden"
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        <div className="flex items-center gap-2 2xl:hidden">
+          <button type="button" className="icon-btn" onClick={onSearch} aria-label="Search">
+            <Search size={18} />
+          </button>
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
         {open && (
           <motion.nav
             aria-label="Mobile"
-            className="fixed inset-x-0 top-[var(--header-h,5.25rem)] bottom-0 z-50 overflow-y-auto bg-midnight/97 xl:hidden"
+            className="fixed inset-x-0 top-[var(--header-h,4.75rem)] bottom-0 z-50 overflow-y-auto overflow-x-hidden bg-midnight/97 2xl:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <div className="container-x flex flex-col py-8">
-              {NAV.map((n, i) => (
-                <motion.div key={n.to} initial={{ x: -16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.04 }}>
+            <div className="container-x flex flex-col py-6">
+              {MOBILE_NAV.map((n, i) => (
+                <motion.div key={n.to} initial={{ x: -16, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.03 }}>
                   <NavLink
                     to={n.to}
                     end={n.end}
                     className={({ isActive }) =>
-                      `display block border-b border-white/10 py-3.5 text-4xl ${isActive ? 'text-gold' : 'text-ivory'}`
+                      `display block border-b border-white/10 py-3 text-3xl ${isActive ? 'text-gold' : 'text-ivory'}`
                     }
                   >
                     {n.label}
                   </NavLink>
                 </motion.div>
               ))}
-              <button
-                type="button"
-                className="display flex items-center gap-3 border-b border-white/10 py-3.5 text-left text-4xl"
-                onClick={() => {
-                  setOpen(false)
-                  onSearch()
-                }}
-              >
-                Search
-              </button>
-              <a className="display border-b border-white/10 py-3.5 text-4xl" href={RSS_URL} target="_blank" rel="noreferrer">
+              <div className="border-b border-white/10 py-4">
+                <ReaderThemeToggle />
+              </div>
+              <a className="display border-b border-white/10 py-3 text-3xl" href={RSS_URL} target="_blank" rel="noreferrer">
                 RSS
               </a>
+              {staff && (
+                <a className="display border-b border-white/10 py-3 text-3xl text-gold" href={adminConsoleUrl()}>
+                  Admin console
+                </a>
+              )}
               {user ? (
-                <button type="button" className="display py-3.5 text-left text-4xl text-gold" onClick={() => void signOut()}>
+                <button type="button" className="display py-3 text-left text-3xl text-gold" onClick={() => void signOut()}>
                   Sign out
                 </button>
               ) : (
-                <Link to="/signin" className="display py-3.5 text-4xl text-gold">
+                <Link to="/signin" className="display py-3 text-3xl text-gold">
                   Sign in
                 </Link>
               )}
@@ -346,7 +377,7 @@ function Footer() {
         <nav aria-label="Footer">
           <p className="eyebrow mb-4">Explore</p>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-            {[...NAV.slice(1), { to: '/search', label: 'Search' }, { to: '/signin', label: 'Sign in' }].map((n) => (
+            {[...MOBILE_NAV.slice(1), { to: '/search', label: 'Search' }, { to: '/signin', label: 'Sign in' }].map((n) => (
               <li key={n.to}>
                 <Link to={n.to} className="opacity-75 transition-opacity hover:text-gold hover:opacity-100">
                   {n.label}
@@ -410,18 +441,22 @@ function Footer() {
   )
 }
 
-function ReaderThemeToggle() {
+function ReaderThemeToggle({ compact = false }: { compact?: boolean }) {
   const { active, readerMode, setReaderMode, preferredCountry, setPreferredCountry } = useTheme()
   if (!active?.allowReaderPreference && !active?.allowVisitorRegionSelect) return null
   const next = readerMode === 'dark' ? 'light' : readerMode === 'light' ? 'system' : 'dark'
   const label = readerMode === 'dark' ? 'Dark' : readerMode === 'light' ? 'Light' : 'System'
+  const Icon = readerMode === 'light' ? Sun : readerMode === 'dark' ? Moon : Monitor
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className={`inline-flex items-center ${compact ? 'gap-1' : 'gap-2'}`}>
       {active?.allowVisitorRegionSelect !== false && (
-        <label className="nav-link inline-flex items-center gap-1.5" title="Preferred region for festival themes">
+        <label
+          className="nav-link inline-flex max-w-[5.5rem] items-center gap-1 truncate"
+          title="Preferred region for festival themes"
+        >
           <span className="sr-only">Region</span>
           <select
-            className="bg-transparent border-0 text-inherit text-xs tracking-wide uppercase cursor-pointer outline-none"
+            className="max-w-full cursor-pointer truncate border-0 bg-transparent text-xs tracking-wide uppercase outline-none"
             value={preferredCountry}
             onChange={(e) => setPreferredCountry(e.target.value)}
             aria-label="Preferred festival region"
@@ -442,11 +477,12 @@ function ReaderThemeToggle() {
         <button
           type="button"
           className="nav-link inline-flex items-center gap-1.5"
-          title={`Reading preference: ${label} (click to cycle)`}
+          title={`Reading preference: ${label} (click to cycle Light → System → Dark)`}
           onClick={() => setReaderMode(next)}
         >
-          {readerMode === 'light' ? <Sun size={14} aria-hidden /> : <Moon size={14} aria-hidden />}
-          {label}
+          <Icon size={14} aria-hidden />
+          {!compact && <span>{label}</span>}
+          {compact && <span className="sr-only">{label}</span>}
         </button>
       )}
     </span>

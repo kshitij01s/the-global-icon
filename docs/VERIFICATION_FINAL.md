@@ -1,6 +1,6 @@
 # Final Verification Report — THE GLOBAL ICON
 
-Date: 2026-11-04 (Magazines hero parity + CMS wiring + studio verify)
+Date: 2026-11-04 (Platform integration + auth bridge)
 
 ## Run commands
 
@@ -9,62 +9,47 @@ $env:Path = "C:\Program Files\nodejs;C:\Program Files\Git\cmd;" + $env:Path
 cd "D:\Magazine Project"
 
 npm run dev:api     # http://localhost:4000
-npm run dev:web     # http://localhost:5173  (React — use this for themes)
+npm run dev:web     # http://localhost:5173
 npm run dev:admin   # http://localhost:4200
 ```
 
-Database (additive — do not reset):
+Staff reset (local only):
 
 ```powershell
-cd apps/api
-npx prisma migrate deploy
+cd apps\api
+node scripts\reset-staff-users.js
+# Credentials → apps/api/.superadmin-local.txt (gitignored)
 ```
 
-Festival catalog / templates seed on first studio or themes API call via `ensureFestivalSeeded()`.
+## Auth bridge (verified)
 
-Tests / builds:
+1. Public Sign In at `:5173/signin` with Super Admin credentials.
+2. Redirect to `:4200/` Admin dashboard (“Welcome back, Super Admin”).
+3. Cookie refresh adopted by Angular `AuthService.initialize()`.
+4. Login API + refresh cookie + RSS XML validated via Node fetch.
 
-```powershell
-npm run test -w @tgi/api
-npm run build -w @tgi/api
-npm run build -w @tgi/public-web
-npm run build -w @tgi/admin-dashboard
-```
+## UI fixes verified
 
-## Theme priority
+- Compact header / hamburger below `2xl`; Magazines mega includes Editions.
+- Light/Dark/System re-applies brand tokens.
+- RSS feed `application/rss+xml` + HTML alternate link.
+- `overflow-x: clip` on document root.
 
-1. Super Admin manual override  
-2. Active scheduled **regional** festival  
-3. Active scheduled **global** festival  
-4. Global default theme  
-5. Reader Light / Dark / System (client, when allowed)
+## Tests
 
-## Festival Theme Studio
+- API Jest: run `npm run test -w @tgi/api`
+- Manual browser: staff redirect path confirmed.
 
-- Route: `/theme-studio`
-- APIs under `/api/admin/themes/studio`, `/templates`, `/festivals`, `/calendar`, `/assets`, `/animations`
-- Publish writes to existing `ThemeDefinition` table
-- Scheduler test: `AppearanceSettings.schedulerTestAsOf` (clear after use)
+## Docs
 
-## CMS Page Editor
+- `docs/PLATFORM_INTEGRATION_AND_BUG_FIX_PLAN.md`
+- `docs/AUTHENTICATION_AND_ROLE_ACCESS.md`
+- `docs/LOCAL_DEVELOPMENT_SETUP.md`
+- `docs/UI_BUG_FIX_REPORT.md`
 
-Draft → Preview → Publish → Restore remains on `/pages/:slug` with DB-backed `ManagedPage` / `ManagedPageVersion`.
+## Remaining limitations
 
-## GitHub
-
-Repository: https://github.com/kshitij01s/the-global-icon  
-
-## Verified this session
-
-- Public: Magazines hero gold **MAGAZINES** + dense cover wall; Home CMS `sectionsVisible`; About/Advertise/Contact/Magazines CMS-driven copy.
-- Admin: Festival Theme Studio login + workspace; Page Editor structured copy fields.
-- Scheduler test: `schedulerTestAsOf=2026-12-24` → `festival-christmas` + snowfall effects; cleared after test.
-- Builds/tests: API Jest 27/27; services on `:4000` / `:5173` / `:4200`.
-
-## Known limitations
-
-- Lunar festival dates require yearly admin verification (by design).
-- City-level targeting is not implemented (country/region only).
-- Theme Studio live preview is an in-admin frame (not a full iframe of the public site).
-- Automatic scheduler is request-time resolution (no separate cron worker required).
-- Bookmark/save library UI is not fully productized (homepage copy no longer claims it).
+- Access JWT still in Angular `localStorage` (httpOnly refresh is the durable credential).
+- No one-time handoff code endpoint (cookie bridge is sufficient for localhost).
+- Forgot-password is contact-flow only (no email reset yet).
+- Lunar festival dates still need yearly admin verification.
