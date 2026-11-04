@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Reveal } from '../components/ui'
-import { useDocumentTitle } from '../lib/hooks'
+import { api } from '../lib/api'
+import { useAsync, useDocumentTitle } from '../lib/hooks'
+
+type AdvertiseCms = { eyebrow?: string; headline?: string; body?: string }
 
 const WHY = [
   {
@@ -67,16 +70,20 @@ const DEMO_CAMPAIGNS = [
 
 export default function Advertise() {
   useDocumentTitle('Advertise')
+  const cmsPage = useAsync((s) => api.managedPage('advertise', s), [])
+  const cms = (cmsPage.data?.content ?? {}) as AdvertiseCms
   return (
     <div className="mood-midnight text-ivory">
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(70%_60%_at_70%_0%,rgba(197,165,114,0.18),transparent_55%),radial-gradient(50%_50%_at_10%_80%,rgba(163,32,47,0.22),transparent_60%)]" />
         <div className="container-x py-24 md:py-32">
-          <p className="eyebrow mb-4">Advertising &amp; partnerships</p>
-          <h1 className="display max-w-4xl text-5xl md:text-7xl">Advertise with THE GLOBAL ICON</h1>
+          <p className="eyebrow mb-4">{cms.eyebrow ?? 'Advertising & partnerships'}</p>
+          <h1 className="display max-w-4xl text-5xl md:text-7xl">
+            {cms.headline ?? 'Advertise with THE GLOBAL ICON'}
+          </h1>
           <p className="mt-6 max-w-2xl text-lg text-ivory/75">
-            Partner with an international digital magazine reaching readers who follow global business, leadership, and
-            innovation. This page describes opportunities — it does not invent audience size or campaign results.
+            {cms.body ??
+              'Partner with an international digital magazine reaching readers who follow global business, leadership, and innovation. This page describes opportunities — it does not invent audience size or campaign results.'}
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link to="/contact" className="btn btn-gold">

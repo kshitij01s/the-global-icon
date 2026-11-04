@@ -1,6 +1,6 @@
 # Final Verification Report — THE GLOBAL ICON
 
-Date: 2026-11-02 (Festival Theme Studio delivery)
+Date: 2026-11-04 (Magazines hero parity + CMS wiring + studio verify)
 
 ## Run commands
 
@@ -54,9 +54,17 @@ Draft → Preview → Publish → Restore remains on `/pages/:slug` with DB-back
 
 Repository: https://github.com/kshitij01s/the-global-icon  
 
+## Verified this session
+
+- Public: Magazines hero gold **MAGAZINES** + dense cover wall; Home CMS `sectionsVisible`; About/Advertise/Contact/Magazines CMS-driven copy.
+- Admin: Festival Theme Studio login + workspace; Page Editor structured copy fields.
+- Scheduler test: `schedulerTestAsOf=2026-12-24` → `festival-christmas` + snowfall effects; cleared after test.
+- Builds/tests: API Jest 27/27; services on `:4000` / `:5173` / `:4200`.
+
 ## Known limitations
 
 - Lunar festival dates require yearly admin verification (by design).
 - City-level targeting is not implemented (country/region only).
 - Theme Studio live preview is an in-admin frame (not a full iframe of the public site).
 - Automatic scheduler is request-time resolution (no separate cron worker required).
+- Bookmark/save library UI is not fully productized (homepage copy no longer claims it).

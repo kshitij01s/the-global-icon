@@ -50,6 +50,7 @@ export default function FestivalEffects({ disable }: { disable?: boolean }) {
       {effects.festiveLights && <div className="festival-lights" />}
       {effects.christmasTree && <div className="festival-tree" title="Festive decoration" />}
       {effects.snowman && <div className="festival-snowman" title="Festive decoration" />}
+      {effects.christmasTree && <div className="festival-gift" title="Festive decoration" />}
       {effects.diyaGlow && <div className="festival-diya" />}
       {effects.hearts && <div className="festival-hearts" />}
       {effects.colourBurst && <div className="festival-holi" />}

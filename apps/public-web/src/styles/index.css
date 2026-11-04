@@ -488,22 +488,34 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 150%;
-  height: 190%;
+  width: 165%;
+  height: 210%;
   display: flex;
   justify-content: center;
-  gap: 1.25rem;
-  transform: translate(-50%, -50%) rotate(-14deg);
+  gap: 1rem;
+  transform: translate(-50%, -50%) rotate(-28deg) skewY(-4deg);
+}
+.wall.wall-dense .wall-stage {
+  width: 190%;
+  height: 230%;
+  gap: 0.65rem;
+  transform: translate(-50%, -50%) rotate(-36deg) skewY(-6deg);
 }
 .wall-col {
-  flex: 0 0 clamp(150px, 15vw, 230px);
+  flex: 0 0 clamp(130px, 13vw, 210px);
   overflow: hidden;
+}
+.wall.wall-dense .wall-col {
+  flex: 0 0 clamp(110px, 11vw, 180px);
 }
 .wall-track {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   will-change: transform;
+}
+.wall.wall-dense .wall-track {
+  gap: 0.65rem;
 }
 .wall-col.up .wall-track {
   animation: wall-up var(--dur, 70s) linear infinite;
@@ -541,11 +553,13 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(60% 55% at 12% 35%, rgba(197, 165, 114, 0.28), transparent 70%),
-    radial-gradient(45% 50% at 92% 80%, rgba(163, 32, 47, 0.38), transparent 70%),
-    radial-gradient(40% 35% at 70% 8%, rgba(197, 165, 114, 0.14), transparent 70%),
-    linear-gradient(90deg, rgba(5, 7, 11, 0.94) 0%, rgba(5, 7, 11, 0.7) 38%, rgba(5, 7, 11, 0.42) 100%),
-    linear-gradient(180deg, rgba(5, 7, 11, 0.55), transparent 30%, transparent 70%, var(--color-midnight));
+    radial-gradient(60% 55% at 12% 35%, rgba(197, 165, 114, 0.22), transparent 70%),
+    radial-gradient(45% 50% at 92% 80%, rgba(163, 32, 47, 0.32), transparent 70%),
+    linear-gradient(105deg, rgba(5, 7, 11, 0.92) 0%, rgba(5, 7, 11, 0.62) 34%, rgba(5, 7, 11, 0.28) 62%, rgba(5, 7, 11, 0.55) 100%),
+    linear-gradient(180deg, rgba(5, 7, 11, 0.5), transparent 28%, transparent 72%, var(--color-midnight));
+}
+.magazines-hero .wall-cover {
+  filter: saturate(0.95) brightness(0.72) contrast(1.05);
 }
 @media (prefers-reduced-motion: reduce) {
   .wall-col .wall-track,
@@ -861,23 +875,62 @@
 .festival-tree,
 .festival-snowman {
   position: absolute;
-  bottom: 1rem;
-  width: 48px;
-  height: 64px;
-  opacity: 0.55;
+  bottom: 1.25rem;
+  opacity: 0.7;
+  pointer-events: none;
 }
 .festival-tree {
-  right: 1.25rem;
+  right: 1.5rem;
+  width: 72px;
+  height: 96px;
   background:
-    linear-gradient(180deg, transparent 0 12%, #166534 12% 70%, #7c4a1e 70%);
-  clip-path: polygon(50% 0, 100% 70%, 70% 70%, 85% 100%, 15% 100%, 30% 70%, 0 70%);
+    linear-gradient(180deg, transparent 0 8%, #14532d 8% 28%, transparent 28% 30%, #166534 30% 55%, transparent 55% 57%, #15803d 57% 78%, #7c4a1e 78%);
+  clip-path: polygon(50% 0, 78% 28%, 62% 28%, 88% 55%, 68% 55%, 100% 78%, 58% 78%, 58% 100%, 42% 100%, 42% 78%, 0 78%, 32% 55%, 12% 55%, 38% 28%, 22% 28%);
+  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.35));
+}
+.festival-tree::after {
+  content: '';
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  background: #f0d78c;
+  clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
 .festival-snowman {
-  left: 1.25rem;
+  left: 1.5rem;
+  width: 56px;
+  height: 78px;
   background:
-    radial-gradient(circle at 50% 22%, #f8fafc 0 28%, transparent 29%),
-    radial-gradient(circle at 50% 52%, #f8fafc 0 34%, transparent 35%),
-    radial-gradient(circle at 50% 85%, #f8fafc 0 40%, transparent 41%);
+    radial-gradient(circle at 50% 18%, #f8fafc 0 16%, transparent 17%),
+    radial-gradient(circle at 50% 48%, #f8fafc 0 22%, transparent 23%),
+    radial-gradient(circle at 50% 82%, #f8fafc 0 28%, transparent 29%);
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+.festival-gift {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 6.5rem;
+  width: 28px;
+  height: 24px;
+  background: linear-gradient(90deg, #b91c1c 40%, #d4af37 40% 60%, #b91c1c 60%);
+  border-radius: 2px;
+  opacity: 0.65;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+.festival-gift::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  width: 18px;
+  height: 8px;
+  margin-left: -9px;
+  border: 2px solid #d4af37;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
 }
 .festival-diya {
   position: absolute;

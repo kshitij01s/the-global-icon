@@ -16,6 +16,13 @@ type HomeCms = {
   turnPagesCopy?: string
   ctaMagazines?: string
   ctaStories?: string
+  sectionsVisible?: {
+    featured?: boolean
+    latest?: boolean
+    stories?: boolean
+    leaders?: boolean
+    advertise?: boolean
+  }
 }
 
 function Hero({ data, cms }: { data: HomeData | null; cms: HomeCms }) {
@@ -193,6 +200,13 @@ export default function Home() {
   const { data, error, loading } = useAsync((s) => api.home(s), [])
   const cmsPage = useAsync((s) => api.managedPage('home', s), [])
   const cms = (cmsPage.data?.content ?? {}) as HomeCms
+  const visible = {
+    featured: cms.sectionsVisible?.featured !== false,
+    latest: cms.sectionsVisible?.latest !== false,
+    stories: cms.sectionsVisible?.stories !== false,
+    leaders: cms.sectionsVisible?.leaders !== false,
+    advertise: cms.sectionsVisible?.advertise !== false,
+  }
   const featured = data?.featuredMagazine ?? data?.latestMagazines[0] ?? null
   const rest = (data?.latestMagazines ?? []).filter((m) => m.id !== featured?.id)
   const lead = data?.featuredArticle
@@ -227,7 +241,7 @@ export default function Home() {
       {loading && !data && <Skeletons />}
       {error && <ErrorState error={error} title="The homepage content is unavailable" />}
 
-      {featured && (
+      {visible.featured && featured && (
         <section id="featured" className="mood-ivory section">
           <div className="container-x grid items-center gap-12 md:grid-cols-[minmax(0,0.9fr)_1.1fr] md:gap-20">
             <Reveal>
@@ -275,7 +289,7 @@ export default function Home() {
         </section>
       )}
 
-      {rest.length > 0 && (
+      {visible.latest && rest.length > 0 && (
         <section className="mood-charcoal section">
           <div className="container-x">
             <SectionHeading eyebrow="Latest editions" title="From the newsstand" action={{ to: '/magazines', label: 'All magazines' }} />
@@ -290,7 +304,7 @@ export default function Home() {
         </section>
       )}
 
-      {lead && (
+      {visible.stories && lead && (
         <section className="mood-paper section">
           <div className="container-x">
             <SectionHeading eyebrow="Stories" title="Ideas worth your time" action={{ to: '/stories', label: 'All stories' }} />
@@ -327,7 +341,7 @@ export default function Home() {
         </section>
       )}
 
-      {data && data.leaders.length > 0 && (
+      {visible.leaders && data && data.leaders.length > 0 && (
         <section className="mood-navy section">
           <div className="container-x">
             <SectionHeading
@@ -353,37 +367,39 @@ export default function Home() {
         </section>
       )}
 
-      <section className="mood-paper section">
-        <div className="container-x grid items-center gap-10 md:grid-cols-[1.2fr_1fr] md:gap-16">
-          <Reveal>
-            <p className="eyebrow mb-3">Global Editorial Spotlight</p>
-            <h2 className="display text-4xl md:text-6xl">Advertise beside the leaders who move markets.</h2>
-            <p className="mt-4 max-w-xl text-lg opacity-75">
-              Timed placements, edition sponsorships, and partnership features — managed through our secure admin
-              workflows with aggregate campaign reporting.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/advertise" className="btn btn-ink">
-                Advertising opportunities
+      {visible.advertise && (
+        <section className="mood-paper section">
+          <div className="container-x grid items-center gap-10 md:grid-cols-[1.2fr_1fr] md:gap-16">
+            <Reveal>
+              <p className="eyebrow mb-3">Global Editorial Spotlight</p>
+              <h2 className="display text-4xl md:text-6xl">Advertise beside the leaders who move markets.</h2>
+              <p className="mt-4 max-w-xl text-lg opacity-75">
+                Timed placements, edition sponsorships, and partnership features — managed through our secure admin
+                workflows with aggregate campaign reporting.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link to="/advertise" className="btn btn-ink">
+                  Advertising opportunities
+                </Link>
+                <Link to="/about" className="btn btn-outline-ink">
+                  About the house
+                </Link>
+              </div>
+            </Reveal>
+            <Reveal delay={0.08} className="border border-black/10 bg-[#f7f2e8] p-8 md:p-10">
+              <p className="eyebrow mb-3">Member access</p>
+              <h3 className="display text-3xl">Sign in for a personalised reading preference.</h3>
+              <p className="mt-3 opacity-75">
+                Readers can choose Light, Dark, or System preference and a regional festival experience when available —
+                without requiring precise location sharing.
+              </p>
+              <Link to="/signin" className="link-arrow mt-6 inline-flex">
+                Sign in
               </Link>
-              <Link to="/about" className="btn btn-outline-ink">
-                About the house
-              </Link>
-            </div>
-          </Reveal>
-          <Reveal delay={0.08} className="border border-black/10 bg-[#f7f2e8] p-8 md:p-10">
-            <p className="eyebrow mb-3">Reader personalization</p>
-            <h3 className="display text-3xl">Save what matters. Resume where you left off.</h3>
-            <p className="mt-3 opacity-75">
-              Signed-in readers can bookmark magazines and stories and continue PDF reading from the last page — privacy
-              respectful and permission-aware.
-            </p>
-            <Link to="/signin" className="link-arrow mt-6 inline-flex">
-              Sign in to your library
-            </Link>
-          </Reveal>
-        </div>
-      </section>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       <section className="relative isolate overflow-hidden bg-midnight py-24 text-center">
         <img src="/brand/city.svg" alt="" aria-hidden className="absolute inset-x-0 bottom-0 -z-10 w-full opacity-40" />

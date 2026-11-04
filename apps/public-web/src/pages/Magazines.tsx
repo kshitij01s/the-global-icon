@@ -9,6 +9,8 @@ import { CoverImage, Empty, ErrorState, Reveal } from '../components/ui'
 import { api, type Magazine } from '../lib/api'
 import { useAsync, useDebounced, useDocumentTitle } from '../lib/hooks'
 
+type MagazinesCms = { eyebrow?: string; headline?: string; body?: string }
+
 const PAGE_SIZE = 12
 
 function Library({
@@ -172,6 +174,8 @@ export default function Magazines() {
 
   const { data, error, loading } = useAsync((s) => api.magazines({ limit: 50 }, s), [])
   const collection2025 = useAsync((s) => api.magazines({ year: 2025, limit: 12 }, s), [])
+  const cmsPage = useAsync((s) => api.managedPage('magazines', s), [])
+  const cms = (cmsPage.data?.content ?? {}) as MagazinesCms
 
   const items = useMemo(() => data?.items ?? [], [data])
   const years = useMemo(() => data?.facets?.years ?? [], [data])
@@ -194,33 +198,27 @@ export default function Magazines() {
 
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-midnight">
-        <MagazineWall covers={covers} />
-        <div className="container-x relative z-10 flex min-h-[min(78vh,640px)] flex-col justify-center py-20">
-          <motion.p className="eyebrow mb-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>
-            Magazine exhibition
-          </motion.p>
+      <section className="relative isolate overflow-hidden bg-midnight magazines-hero">
+        <MagazineWall covers={covers} dense />
+        <div className="container-x relative z-10 flex min-h-[min(82vh,720px)] flex-col justify-center py-20">
           <motion.h1
-            className="display text-[clamp(3.5rem,11vw,9rem)] leading-[0.9] tracking-tight"
+            className="display text-[clamp(3.25rem,12vw,8.5rem)] leading-[0.88] tracking-[0.04em] uppercase"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.2, 0.7, 0.2, 1] }}
           >
-            <span className="gold-text">NEWSSTAND</span>
+            <span className="gold-text">{cms.headline ?? 'Magazines'}</span>
           </motion.h1>
-          <motion.div
-            className="mt-7 flex max-w-xl gap-5"
+          <motion.p
+            className="mt-6 max-w-xl text-base leading-relaxed text-ivory/90 md:text-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.4 }}
+            transition={{ duration: 1, delay: 0.35 }}
           >
-            <span className="w-0.5 shrink-0 bg-crimson-bright" aria-hidden />
-            <p className="text-lg text-ivory/85 md:text-xl">
-              A darker, cover-led discovery space — featured editions, year archives, and industry collections. Distinct
-              from the homepage hero: this is the magazine wall.
-            </p>
-          </motion.div>
-          <motion.div className="mt-9 flex flex-wrap gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
+            {cms.body ??
+              'THE GLOBAL ICON is an international magazine that highlights visionary leaders, innovative thinkers, and impactful changemakers. Through engaging stories, interviews, and features, it delivers fresh insights and diverse global perspectives.'}
+          </motion.p>
+          <motion.div className="mt-9 flex flex-wrap gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
             <a href="#library" className="btn btn-gold">
               Browse the library
             </a>

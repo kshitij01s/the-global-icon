@@ -92,6 +92,16 @@ const DEFAULT_PAGES: {
       body: 'Editorial, advertising, and partnership enquiries are welcome.',
     },
   },
+  {
+    slug: 'magazines',
+    title: 'Magazines',
+    description: 'Magazines exhibition hero copy.',
+    content: {
+      eyebrow: 'Magazine exhibition',
+      headline: 'Magazines',
+      body: 'THE GLOBAL ICON is an international magazine that highlights visionary leaders, innovative thinkers, and impactful changemakers. Through engaging stories, interviews, and features, it delivers fresh insights and diverse global perspectives.',
+    },
+  },
 ];
 
 @ApiTags('admin')

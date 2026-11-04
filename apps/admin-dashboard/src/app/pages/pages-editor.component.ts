@@ -52,9 +52,23 @@ import { errorMessage } from '../core/util';
           <label class="field"><span>Title</span><input [(ngModel)]="draft.title" /></label>
           <label class="field"><span>Description</span><textarea rows="2" [(ngModel)]="draft.description"></textarea></label>
           <label class="field"><span>Page theme slug (optional override)</span><input [(ngModel)]="draft.pageThemeSlug" placeholder="e.g. classic-light" /></label>
+
+          <h2>Page copy</h2>
+          <p class="muted small">Edit common fields below. Advanced keys remain available in Content JSON.</p>
+          @for (f of contentFields(); track f.key) {
+            <label class="field">
+              <span>{{ f.label }}</span>
+              @if (f.multiline) {
+                <textarea rows="3" [(ngModel)]="fields[f.key]" (ngModelChange)="syncJsonFromFields()"></textarea>
+              } @else {
+                <input [(ngModel)]="fields[f.key]" (ngModelChange)="syncJsonFromFields()" />
+              }
+            </label>
+          }
+
           <label class="field">
-            <span>Content JSON</span>
-            <textarea rows="18" [(ngModel)]="draft.contentJson" class="code"></textarea>
+            <span>Content JSON (advanced)</span>
+            <textarea rows="12" [(ngModel)]="draft.contentJson" class="code" (ngModelChange)="syncFieldsFromJson()"></textarea>
           </label>
 
           <div class="form-actions">
@@ -142,9 +156,30 @@ export class PagesEditorComponent implements OnInit {
   protected readonly busy = signal(false);
 
   protected draft = { title: '', description: '', pageThemeSlug: '', contentJson: '{}' };
+  protected fields: Record<string, string> = {};
 
   protected canEdit = () => this.auth.can('pages.edit') || this.auth.can('pages.publish');
   protected canPublish = () => this.auth.can('pages.publish');
+
+  protected contentFields() {
+    const slug = this.slug();
+    if (slug === 'home') {
+      return [
+        { key: 'heroEyebrow', label: 'Hero eyebrow', multiline: false },
+        { key: 'heroTitle', label: 'Brand / hero title', multiline: false },
+        { key: 'heroTagline', label: 'Tagline', multiline: false },
+        { key: 'turnPagesHeadline', label: 'Turn the pages headline', multiline: false },
+        { key: 'turnPagesCopy', label: 'Turn the pages copy', multiline: true },
+        { key: 'ctaMagazines', label: 'Magazines CTA label', multiline: false },
+        { key: 'ctaStories', label: 'Stories CTA label', multiline: false },
+      ];
+    }
+    return [
+      { key: 'eyebrow', label: 'Eyebrow', multiline: false },
+      { key: 'headline', label: 'Headline', multiline: false },
+      { key: 'body', label: 'Body', multiline: true },
+    ];
+  }
 
   ngOnInit(): void {
     this.api.listManagedPages().subscribe({
@@ -168,9 +203,37 @@ export class PagesEditorComponent implements OnInit {
           pageThemeSlug: p.pageThemeSlug ?? '',
           contentJson: JSON.stringify(p.content ?? {}, null, 2),
         };
+        this.syncFieldsFromJson();
       },
       error: (e) => this.error.set(errorMessage(e)),
     });
+  }
+
+  protected syncFieldsFromJson(): void {
+    try {
+      const content = JSON.parse(this.draft.contentJson || '{}') as Record<string, unknown>;
+      const next: Record<string, string> = {};
+      for (const f of this.contentFields()) {
+        const v = content[f.key];
+        next[f.key] = typeof v === 'string' ? v : v == null ? '' : String(v);
+      }
+      this.fields = next;
+    } catch {
+      /* keep existing field values when JSON is mid-edit */
+    }
+  }
+
+  protected syncJsonFromFields(): void {
+    let content: Record<string, unknown> = {};
+    try {
+      content = JSON.parse(this.draft.contentJson || '{}') as Record<string, unknown>;
+    } catch {
+      content = {};
+    }
+    for (const f of this.contentFields()) {
+      content[f.key] = this.fields[f.key] ?? '';
+    }
+    this.draft.contentJson = JSON.stringify(content, null, 2);
   }
 
   protected reload(): void {
@@ -183,6 +246,7 @@ export class PagesEditorComponent implements OnInit {
       about: '/about',
       advertise: '/advertise',
       contact: '/contact',
+      magazines: '/magazines',
     };
     const path = map[this.slug()] ?? '/';
     return `http://localhost:5173${path}`;

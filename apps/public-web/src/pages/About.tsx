@@ -1,22 +1,32 @@
 import { Link } from 'react-router-dom'
 import { Reveal, SectionHeading } from '../components/ui'
-import { useDocumentTitle } from '../lib/hooks'
+import { api } from '../lib/api'
+import { useAsync, useDocumentTitle } from '../lib/hooks'
+
+type AboutCms = {
+  eyebrow?: string
+  headline?: string
+  body?: string
+}
 
 export default function About() {
   useDocumentTitle('About Us')
+  const cmsPage = useAsync((s) => api.managedPage('about', s), [])
+  const cms = (cmsPage.data?.content ?? {}) as AboutCms
+  const eyebrow = cms.eyebrow ?? 'About the house'
+  const headline = cms.headline ?? 'An international editorial house for leaders who shape tomorrow.'
+  const body =
+    cms.body ??
+    'THE GLOBAL ICON publishes premium digital magazines, leadership profiles, and long-form stories that connect business, technology, and global impact.'
+
   return (
     <div className="mood-ivory">
       <section className="relative isolate overflow-hidden bg-midnight text-ivory">
         <div className="hero-vignette absolute inset-0 -z-10 opacity-80" />
         <div className="container-x py-24 md:py-32">
-          <p className="eyebrow mb-4">About the house</p>
-          <h1 className="display max-w-4xl text-5xl md:text-7xl">
-            An international editorial house for leaders who shape tomorrow.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-ivory/75">
-            THE GLOBAL ICON publishes premium digital magazines, leadership profiles, and long-form stories that connect
-            business, technology, and global impact — without copying anyone else&apos;s brand or voice.
-          </p>
+          <p className="eyebrow mb-4">{eyebrow}</p>
+          <h1 className="display max-w-4xl text-5xl md:text-7xl">{headline}</h1>
+          <p className="mt-6 max-w-2xl text-lg text-ivory/75">{body}</p>
         </div>
       </section>
 

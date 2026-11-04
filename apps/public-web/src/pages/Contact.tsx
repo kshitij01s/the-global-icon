@@ -28,10 +28,14 @@ const EMPTY: EnquiryInput = {
   message: '',
 }
 
+type ContactCms = { eyebrow?: string; headline?: string; body?: string }
+
 export default function Contact() {
   useDocumentTitle('Contact')
   const { user } = useAuth()
   const { data: settings } = useAsync((s) => api.settings(s), [])
+  const cmsPage = useAsync((s) => api.managedPage('contact', s), [])
+  const cms = (cmsPage.data?.content ?? {}) as ContactCms
   const [form, setForm] = useState<EnquiryInput>(EMPTY)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -64,13 +68,19 @@ export default function Contact() {
         <aside className="mood-navy relative overflow-hidden px-6 py-16 md:px-14 md:py-24">
           <img src="/brand/globe.svg" alt="" aria-hidden className="pointer-events-none absolute -right-24 -bottom-24 w-[28rem] opacity-25" />
           <div className="relative">
-            <p className="eyebrow mb-5">Contact</p>
+            <p className="eyebrow mb-5">{cms.eyebrow ?? 'Contact'}</p>
             <h1 className="display text-5xl md:text-7xl">
-              Let’s start a <span className="gold-text italic">conversation.</span>
+              {cms.headline ? (
+                cms.headline
+              ) : (
+                <>
+                  Let’s start a <span className="gold-text italic">conversation.</span>
+                </>
+              )}
             </h1>
             <p className="mt-6 max-w-md text-lg opacity-75">
-              Advertising, features, partnerships or a story we should know about — tell us a little and the right editor will
-              reply.
+              {cms.body ??
+                'Advertising, features, partnerships or a story we should know about — tell us a little and the right editor will reply.'}
             </p>
             <dl className="mt-12 space-y-6 text-lg">
               {settings?.contactEmail && (
