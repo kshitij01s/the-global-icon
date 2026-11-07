@@ -6,6 +6,7 @@ import { PermissionsGuard } from '../auth/guards';
 import { PERMISSIONS, ROLE_PERMISSIONS } from '../auth/permissions';
 import type { AuthUser } from '../common/types';
 import type { PrismaService } from '../prisma/prisma.service';
+import { ApiInboxController } from '../api-inbox/api-inbox.controller';
 import { AdminController } from './admin.controller';
 import { AdminAdvertisingController } from './advertising';
 import { AdminArticlesController } from './articles.controller';
@@ -33,6 +34,7 @@ const CONTROLLERS = [
   AdminLookupsController,
   AdminUploadsController,
   AdminAdvertisingController,
+  ApiInboxController,
 ];
 
 function makeUser(id: string, roles: RoleName[]): AuthUser {
@@ -54,7 +56,7 @@ function contextFor(
   method: string,
   user: AuthUser,
 ): ExecutionContext {
-  const handler = (controller.prototype as Record<string, () => unknown>)[method];
+  const handler = (controller.prototype as unknown as Record<string, () => unknown>)[method];
   return {
     getHandler: () => handler,
     getClass: () => controller,
@@ -83,7 +85,7 @@ describe('admin RBAC', () => {
       expect(methods.length).toBeGreaterThan(0);
       for (const method of methods) {
         const required = reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
-          (controller.prototype as Record<string, () => unknown>)[method],
+          (controller.prototype as unknown as Record<string, () => unknown>)[method],
           controller,
         ]);
         expect({ route: `${controller.name}.${method}`, ok: Boolean(required?.length) }).toEqual({

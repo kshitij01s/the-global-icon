@@ -23,4 +23,5 @@ export const ACCESS = {
   themes: { anyPermissions: ['themes.view', 'themes.manage'] },
   pages: { anyPermissions: ['pages.view', 'pages.edit', 'pages.publish'] },
   announcements: { anyPermissions: ['site.manage'] },
+  apiInbox: { anyPermissions: ['api_inbox.view', 'api_inbox.manage'] },
 } satisfies Record<string, AccessRule>;

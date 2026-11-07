@@ -30,6 +30,8 @@ export const PERMISSIONS = {
   USERS_MANAGE: 'users.manage',
   USERS_MANAGE_ADMINS: 'users.manage_admins',
   AUDIT_VIEW: 'audit.view',
+  API_INBOX_VIEW: 'api_inbox.view',
+  API_INBOX_MANAGE: 'api_inbox.manage',
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -65,6 +67,8 @@ export const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
   'users.manage': 'Manage reader and staff accounts',
   'users.manage_admins': 'Grant or revoke administrator roles',
   'audit.view': 'View audit logs',
+  'api_inbox.view': 'View operational API Inbox incidents',
+  'api_inbox.manage': 'Acknowledge and resolve API Inbox incidents',
 };
 
 export const ROLE_DESCRIPTIONS: Record<RoleName, string> = {

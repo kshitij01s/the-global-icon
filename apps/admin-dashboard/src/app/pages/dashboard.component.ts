@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminApiService } from '../core/admin-api.service';
+import { ApiInboxAlertsService } from '../core/api-inbox-alerts.service';
 import { AuthService } from '../core/auth.service';
 import { DashboardStats } from '../core/models';
 import { errorMessage, humanize } from '../core/util';
@@ -25,6 +26,15 @@ interface StatCard {
       </div>
       <button type="button" class="btn btn-ghost" (click)="load()" [disabled]="loading()">Refresh</button>
     </header>
+
+    @if (auth.allows(apiInboxAccess) && inbox.openCount() > 0) {
+      <a class="ops-strip" routerLink="/api-inbox" [class.critical]="inbox.criticalCount() > 0">
+        <strong>{{ inbox.openCount() }} API issue{{ inbox.openCount() === 1 ? '' : 's' }} require attention</strong>
+        @if (inbox.criticalCount() > 0) {
+          <span>{{ inbox.criticalCount() }} Critical integration failure{{ inbox.criticalCount() === 1 ? '' : 's' }}</span>
+        }
+      </a>
+    }
 
     @if (error()) {
       <div class="alert alert-error">{{ error() }}</div>
@@ -88,6 +98,8 @@ interface StatCard {
 export class DashboardComponent {
   private readonly api = inject(AdminApiService);
   protected readonly auth = inject(AuthService);
+  protected readonly inbox = inject(ApiInboxAlertsService);
+  protected readonly apiInboxAccess = { anyPermissions: ['api_inbox.view', 'api_inbox.manage'] };
 
   protected readonly stats = signal<DashboardStats | null>(null);
   protected readonly loading = signal(false);

@@ -7,11 +7,14 @@ import {
   Param,
   Patch,
   Post,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 import type { Prisma } from '@prisma/client';
+import { ApiInboxService } from '../api-inbox/api-inbox.service';
+import { ApiInboxSeverity } from '../api-inbox/api-inbox.enums';
 import { CurrentUser, RequirePermissions } from '../auth/decorators';
 import { JwtAuthGuard, PermissionsGuard } from '../auth/guards';
 import { PERMISSIONS } from '../auth/permissions';
@@ -109,7 +112,10 @@ const DEFAULT_PAGES: {
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('admin/pages')
 export class AdminPagesController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiInbox: ApiInboxService,
+  ) {}
 
   private async ensureDefaults() {
     for (const p of DEFAULT_PAGES) {
@@ -194,18 +200,35 @@ export class AdminPagesController {
   async publish(@CurrentUser() user: AuthUser, @Param('slug') slug: string) {
     const existing = await this.prisma.managedPage.findUnique({ where: { slug } });
     if (!existing) throw new NotFoundException('Page not found');
-    const updated = await this.prisma.managedPage.update({
-      where: { slug },
-      data: { status: 'PUBLISHED', publishedAt: new Date(), updatedById: user.id },
-    });
-    await writeAudit(this.prisma, {
-      actor: user,
-      modelLabel: 'ManagedPage',
-      eventType: 'page.publish',
-      objectId: updated.id,
-      objectRepr: slug,
-    });
-    return updated;
+    try {
+      const updated = await this.prisma.managedPage.update({
+        where: { slug },
+        data: { status: 'PUBLISHED', publishedAt: new Date(), updatedById: user.id },
+      });
+      await writeAudit(this.prisma, {
+        actor: user,
+        modelLabel: 'ManagedPage',
+        eventType: 'page.publish',
+        objectId: updated.id,
+        objectRepr: slug,
+      });
+      return updated;
+    } catch (err) {
+      if (err instanceof NotFoundException) throw err;
+      const report = await this.apiInbox.reportSafe({
+        category: 'page_publish',
+        source: 'admin.pages.publish',
+        technicalError: err instanceof Error ? err : String(err),
+        severity: ApiInboxSeverity.CRITICAL,
+        userId: user.id,
+        entityType: 'managed_page',
+        entityId: slug,
+      });
+      throw new ServiceUnavailableException(
+        report?.customerMessage ??
+          'The page could not be published. Please try again later.',
+      );
+    }
   }
 
   @Post(':slug/restore/:versionId')

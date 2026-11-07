@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AdminModule } from './admin/admin.module';
+import { ApiInboxModule } from './api-inbox/api-inbox.module';
 import { AppController } from './app.controller';
 import { ArticlesModule } from './articles/articles.module';
 import { AuthModule } from './auth/auth.module';
@@ -28,6 +29,7 @@ import { UsersModule } from './users/users.module';
     }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     PrismaModule,
+    ApiInboxModule,
     StorageModule,
     AuthModule,
     UsersModule,

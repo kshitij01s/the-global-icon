@@ -1,8 +1,17 @@
-import { Controller, Get, Injectable, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Injectable,
+  Query,
+  ServiceUnavailableException,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdPlacement, Prisma } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsDateString, IsEnum, IsOptional } from 'class-validator';
+import { ApiInboxService } from '../api-inbox/api-inbox.service';
+import { ApiInboxSeverity } from '../api-inbox/api-inbox.enums';
 import { RequirePermissions } from '../auth/decorators';
 import { JwtAuthGuard, PermissionsGuard } from '../auth/guards';
 import { PERMISSIONS } from '../auth/permissions';
@@ -32,7 +41,10 @@ export class AdReportQueryDto {
 
 @Injectable()
 export class AdminAdvertisingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiInbox: ApiInboxService,
+  ) {}
 
   async list(query: AdListQueryDto) {
     const { page, limit, skip, take } = resolvePaging(query, 20);
@@ -68,45 +80,58 @@ export class AdminAdvertisingService {
 
   /** Aggregate impressions/clicks per advertisement. Contains no personal data. */
   async report(query: AdReportQueryDto) {
-    const createdAt: Prisma.DateTimeFilter = {
-      ...(query.from ? { gte: new Date(query.from) } : {}),
-      ...(query.to ? { lte: new Date(query.to) } : {}),
-    };
-    const events = await this.prisma.advertisementEvent.groupBy({
-      by: ['advertisementId', 'eventType'],
-      where: Object.keys(createdAt).length ? { createdAt } : {},
-      _count: { _all: true },
-    });
-    const ads = await this.prisma.advertisement.findMany({
-      select: { id: true, title: true, advertiser: true, placement: true, isActive: true },
-    });
-    const totals = new Map<string, { impressions: number; clicks: number }>();
-    for (const e of events) {
-      const entry = totals.get(e.advertisementId) ?? { impressions: 0, clicks: 0 };
-      if (e.eventType === 'IMPRESSION') entry.impressions += e._count._all;
-      else entry.clicks += e._count._all;
-      totals.set(e.advertisementId, entry);
-    }
-    const items = ads.map((ad) => {
-      const t = totals.get(ad.id) ?? { impressions: 0, clicks: 0 };
-      return {
-        ...ad,
-        ...t,
-        ctr: t.impressions > 0 ? Number((t.clicks / t.impressions).toFixed(4)) : 0,
+    try {
+      const createdAt: Prisma.DateTimeFilter = {
+        ...(query.from ? { gte: new Date(query.from) } : {}),
+        ...(query.to ? { lte: new Date(query.to) } : {}),
       };
-    });
-    return {
-      from: query.from ?? null,
-      to: query.to ?? null,
-      totals: items.reduce(
-        (acc, i) => ({
-          impressions: acc.impressions + i.impressions,
-          clicks: acc.clicks + i.clicks,
-        }),
-        { impressions: 0, clicks: 0 },
-      ),
-      items,
-    };
+      const events = await this.prisma.advertisementEvent.groupBy({
+        by: ['advertisementId', 'eventType'],
+        where: Object.keys(createdAt).length ? { createdAt } : {},
+        _count: { _all: true },
+      });
+      const ads = await this.prisma.advertisement.findMany({
+        select: { id: true, title: true, advertiser: true, placement: true, isActive: true },
+      });
+      const totals = new Map<string, { impressions: number; clicks: number }>();
+      for (const e of events) {
+        const entry = totals.get(e.advertisementId) ?? { impressions: 0, clicks: 0 };
+        if (e.eventType === 'IMPRESSION') entry.impressions += e._count._all;
+        else entry.clicks += e._count._all;
+        totals.set(e.advertisementId, entry);
+      }
+      const items = ads.map((ad) => {
+        const t = totals.get(ad.id) ?? { impressions: 0, clicks: 0 };
+        return {
+          ...ad,
+          ...t,
+          ctr: t.impressions > 0 ? Number((t.clicks / t.impressions).toFixed(4)) : 0,
+        };
+      });
+      return {
+        from: query.from ?? null,
+        to: query.to ?? null,
+        totals: items.reduce(
+          (acc, i) => ({
+            impressions: acc.impressions + i.impressions,
+            clicks: acc.clicks + i.clicks,
+          }),
+          { impressions: 0, clicks: 0 },
+        ),
+        items,
+      };
+    } catch (err) {
+      const report = await this.apiInbox.reportSafe({
+        category: 'campaign_analytics',
+        source: 'admin.advertising.report',
+        technicalError: err instanceof Error ? err : String(err),
+        severity: ApiInboxSeverity.WARNING,
+      });
+      throw new ServiceUnavailableException(
+        report?.customerMessage ??
+          'We could not complete the advertising request. Please try again shortly.',
+      );
+    }
   }
 }
 

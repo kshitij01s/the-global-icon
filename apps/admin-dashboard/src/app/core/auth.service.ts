@@ -1,5 +1,5 @@
 import { HttpClient, HttpContext, HttpContextToken } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, Injector, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   Observable,
@@ -69,6 +69,7 @@ function isStaff(user: AuthUser): boolean {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
   private readonly base = environment.apiUrl;
 
   private readonly tokenSig = signal<string | null>(read(TOKEN_KEY));
@@ -179,6 +180,10 @@ export class AuthService {
   }
 
   clearSession(): void {
+    // Lazy resolve avoids circular DI with ApiInboxAlertsService → AuthService.
+    void import('./api-inbox-alerts.service').then(({ ApiInboxAlertsService }) => {
+      this.injector.get(ApiInboxAlertsService).stop();
+    });
     this.tokenSig.set(null);
     this.userSig.set(null);
     write(TOKEN_KEY, null);

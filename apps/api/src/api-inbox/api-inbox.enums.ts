@@ -1,0 +1,61 @@
+export enum ApiInboxSeverity {
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  CRITICAL = 'CRITICAL',
+}
+
+export enum ApiInboxStatus {
+  OPEN = 'OPEN',
+  ACKNOWLEDGED = 'ACKNOWLEDGED',
+  RESOLVED = 'RESOLVED',
+}
+
+/** Known operational categories for THE GLOBAL ICON. Extensible via free-form strings. */
+export const API_INBOX_CATEGORIES = [
+  'auth',
+  'login',
+  'session',
+  'permissions',
+  'user_management',
+  'magazine_upload',
+  'magazine_update',
+  'magazine_delete',
+  'magazine_download',
+  'pdf_processing',
+  'file_storage',
+  'cover_image',
+  'magazine_publish',
+  'edition',
+  'story',
+  'leaders',
+  'cms',
+  'page_publish',
+  'content_sync',
+  'advertising',
+  'campaign',
+  'campaign_analytics',
+  'invoice',
+  'payment',
+  'billing',
+  'email_notification',
+  'rss',
+  'webhook',
+  'third_party_api',
+  'external_integration',
+  'data_sync',
+  'theme',
+  'festival_theme',
+  'festival_schedule',
+  'regional_calendar',
+  'theme_asset',
+  'scheduler',
+  'database',
+  'storage',
+  'background_job',
+  'notification',
+  'email',
+  'app',
+  'system',
+] as const;
+
+export type ApiInboxCategory = (typeof API_INBOX_CATEGORIES)[number] | string;

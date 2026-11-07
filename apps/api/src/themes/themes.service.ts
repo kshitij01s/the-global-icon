@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
+import { ApiInboxService } from '../api-inbox/api-inbox.service';
+import { ApiInboxSeverity } from '../api-inbox/api-inbox.enums';
 import { writeAudit } from '../common/audit';
 import type { AuthUser } from '../common/types';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,6 +26,7 @@ export class ThemesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly studio: FestivalStudioService,
+    private readonly apiInbox: ApiInboxService,
   ) {}
 
   async ensureSeeded() {
@@ -107,6 +110,27 @@ export class ThemesService {
   }
 
   async resolveActive(now = new Date(), opts: { countryCode?: string; regionCode?: string } = {}) {
+    try {
+      return await this.resolveActiveInner(now, opts);
+    } catch (err) {
+      if (err instanceof BadRequestException || err instanceof NotFoundException || err instanceof ForbiddenException) {
+        throw err;
+      }
+      await this.apiInbox.reportSafe({
+        category: 'festival_schedule',
+        source: 'themes.resolveActive',
+        technicalError: err instanceof Error ? err : String(err),
+        severity: ApiInboxSeverity.CRITICAL,
+        metadata: { countryCode: opts.countryCode, regionCode: opts.regionCode },
+      });
+      throw err;
+    }
+  }
+
+  private async resolveActiveInner(
+    now = new Date(),
+    opts: { countryCode?: string; regionCode?: string } = {},
+  ) {
     await this.ensureSeeded();
     const settings = await this.getAppearance();
     // Super Admin scheduler test mode: simulate "now" without publishing to real visitors unless override is set.

@@ -313,4 +313,92 @@ export class AdminApiService {
   deleteAnnouncement(id: string): Observable<{ deleted: boolean }> {
     return this.http.delete<{ deleted: boolean }>(`${this.base}/admin/announcements/${encodeURIComponent(id)}`);
   }
+
+  // API Inbox
+  apiInboxAlerts(): Observable<ApiInboxAlerts> {
+    return this.http.get<ApiInboxAlerts>(`${this.base}/admin/api-inbox/alerts`);
+  }
+  listApiInbox(query: ApiInboxQuery): Observable<PaginatedApiInbox> {
+    return this.http.get<PaginatedApiInbox>(`${this.base}/admin/api-inbox`, {
+      params: toParams({ ...query }),
+    });
+  }
+  getApiInboxItem(id: string): Observable<ApiInboxItem> {
+    return this.http.get<ApiInboxItem>(`${this.base}/admin/api-inbox/${encodeURIComponent(id)}`);
+  }
+  patchApiInboxItem(
+    id: string,
+    body: { status?: string; adminNotes?: string },
+  ): Observable<ApiInboxItem> {
+    return this.http.patch<ApiInboxItem>(
+      `${this.base}/admin/api-inbox/${encodeURIComponent(id)}`,
+      body,
+    );
+  }
+  simulateApiInboxFailure(body: { scenario?: string } = {}): Observable<unknown> {
+    return this.http.post(`${this.base}/dev/api-inbox/simulate-failure`, body);
+  }
+}
+
+export interface ApiInboxAlerts {
+  openCount: number;
+  criticalCount: number;
+  warningCount: number;
+  latest: Array<{
+    id: string;
+    title: string;
+    category: string;
+    source: string;
+    severity: string;
+    status: string;
+    occurrenceCount: number;
+    lastSeenAt: string;
+  }>;
+}
+
+export interface ApiInboxItem {
+  id: string;
+  category: string;
+  source: string;
+  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  status: 'OPEN' | 'ACKNOWLEDGED' | 'RESOLVED';
+  title: string;
+  customerMessage: string;
+  technicalError: string;
+  fingerprint: string;
+  occurrenceCount: number;
+  lastSeenAt: string;
+  createdAt: string;
+  updatedAt: string;
+  userId?: string | null;
+  entityId?: string | null;
+  entityType?: string | null;
+  metadata?: Record<string, unknown> | null;
+  acknowledgedAt?: string | null;
+  acknowledgedById?: string | null;
+  resolvedAt?: string | null;
+  resolvedById?: string | null;
+  adminNotes?: string | null;
+  emailSentAt?: string | null;
+}
+
+export interface ApiInboxQuery {
+  page?: number;
+  limit?: number;
+  status?: string;
+  severity?: string;
+  category?: string;
+  source?: string;
+  search?: string;
+  entityType?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface PaginatedApiInbox {
+  items: ApiInboxItem[];
+  total: number;
+  page: number;
+  limit: number;
+  pageCount: number;
 }

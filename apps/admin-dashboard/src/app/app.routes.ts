@@ -127,6 +127,13 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/announcements.component').then((m) => m.AnnouncementsComponent),
       },
       {
+        path: 'api-inbox',
+        title: 'API Inbox · TGI Admin',
+        canActivate: [accessGuard],
+        data: { access: ACCESS.apiInbox },
+        loadComponent: () => import('./pages/api-inbox.component').then((m) => m.ApiInboxComponent),
+      },
+      {
         path: 'forbidden',
         title: 'No access · TGI Admin',
         loadComponent: () => import('./pages/forbidden.component').then((m) => m.ForbiddenComponent),

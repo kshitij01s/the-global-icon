@@ -2,8 +2,11 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ApiInboxService } from '../api-inbox/api-inbox.service';
+import { ApiInboxSeverity } from '../api-inbox/api-inbox.enums';
 import { paginated, resolvePaging } from '../common/pagination';
 import type { AuthUser } from '../common/types';
 import { uniqueSlug } from '../common/slug';
@@ -36,7 +39,10 @@ function toAdminMagazine(m: MagazineWithRelations) {
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly apiInbox: ApiInboxService,
+  ) {}
 
   async dashboard() {
     const [
@@ -203,18 +209,35 @@ export class AdminService {
     if (!magazine.pdfKey) {
       throw new BadRequestException('Cannot publish a magazine without a PDF');
     }
-    const updated = await this.prisma.magazine.update({
-      where: { id },
-      data: {
-        isPublished: true,
-        reviewStatus: 'APPROVED',
-        publishedAt: magazine.publishedAt ?? new Date(),
-        publishedById: actor.id,
-      },
-      include: magazineInclude,
-    });
-    await this.audit(actor, 'magazine.published', id, updated.title);
-    return toAdminMagazine(updated);
+    try {
+      const updated = await this.prisma.magazine.update({
+        where: { id },
+        data: {
+          isPublished: true,
+          reviewStatus: 'APPROVED',
+          publishedAt: magazine.publishedAt ?? new Date(),
+          publishedById: actor.id,
+        },
+        include: magazineInclude,
+      });
+      await this.audit(actor, 'magazine.published', id, updated.title);
+      return toAdminMagazine(updated);
+    } catch (err) {
+      if (err instanceof BadRequestException || err instanceof NotFoundException) throw err;
+      const report = await this.apiInbox.reportSafe({
+        category: 'magazine_publish',
+        source: 'admin.magazines.publish',
+        technicalError: err instanceof Error ? err : String(err),
+        severity: ApiInboxSeverity.CRITICAL,
+        userId: actor.id,
+        entityType: 'magazine',
+        entityId: id,
+      });
+      throw new ServiceUnavailableException(
+        report?.customerMessage ??
+          'The magazine could not be published. Please try again later.',
+      );
+    }
   }
 
   async unpublishMagazine(id: string, actor: AuthUser) {

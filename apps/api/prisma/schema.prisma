@@ -776,3 +776,51 @@ model ManagedPageVersion {
 
   @@index([pageId, createdAt])
 }
+
+enum ApiInboxSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ApiInboxStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+/// Operational integration / platform failures for Admin API Inbox.
+model ApiInboxItem {
+  id               String           @id @default(cuid())
+  category         String
+  source           String
+  severity         ApiInboxSeverity @default(WARNING)
+  status           ApiInboxStatus   @default(OPEN)
+  title            String
+  customerMessage  String
+  technicalError   String
+  fingerprint      String
+  occurrenceCount  Int              @default(1)
+  lastSeenAt       DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  userId           String?
+  entityId         String?
+  entityType       String?
+  metadata         Json?
+  acknowledgedAt   DateTime?
+  acknowledgedById String?
+  resolvedAt       DateTime?
+  resolvedById     String?
+  adminNotes       String?
+  emailSentAt      DateTime?
+
+  @@index([status, severity])
+  @@index([fingerprint, status])
+  @@index([category])
+  @@index([source])
+  @@index([createdAt])
+  @@index([lastSeenAt])
+  @@index([userId])
+  @@index([entityType, entityId])
+}

@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { ACCESS } from '../core/access';
+import { ApiInboxAlertsService } from '../core/api-inbox-alerts.service';
 import { AuthService } from '../core/auth.service';
 import { AccessRule } from '../core/models';
 import { humanize } from '../core/util';
@@ -14,6 +15,7 @@ interface NavItem {
   icon: string;
   access: AccessRule;
   exact?: boolean;
+  badge?: 'apiInbox';
 }
 
 interface NavGroup {
@@ -24,7 +26,10 @@ interface NavGroup {
 const NAV: NavGroup[] = [
   {
     title: 'Dashboard',
-    items: [{ label: 'Overview', path: '/', icon: '▦', access: ACCESS.dashboard, exact: true }],
+    items: [
+      { label: 'Overview', path: '/', icon: '▦', access: ACCESS.dashboard, exact: true },
+      { label: 'API Inbox', path: '/api-inbox', icon: '⌁', access: ACCESS.apiInbox, badge: 'apiInbox' },
+    ],
   },
   {
     title: 'Magazine Management',
@@ -91,6 +96,13 @@ const NAV: NavGroup[] = [
                   [routerLinkActiveOptions]="{ exact: !!item.exact }"
                 >
                   <span class="nav-icon" aria-hidden="true">{{ item.icon }}</span>{{ item.label }}
+                  @if (item.badge === 'apiInbox' && inboxOpen() > 0) {
+                    <span
+                      class="nav-badge"
+                      [class.critical]="inboxCritical() > 0"
+                      [attr.aria-label]="inboxOpen() + ' open API issues'"
+                    >{{ inboxOpen() }}</span>
+                  }
                 </a>
               }
             </div>
@@ -120,8 +132,11 @@ const NAV: NavGroup[] = [
 export class ShellComponent {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly inboxAlerts = inject(ApiInboxAlertsService);
   protected readonly navOpen = signal(false);
   protected readonly apiHost = new URL(environment.apiUrl).host;
+  protected readonly inboxOpen = this.inboxAlerts.openCount;
+  protected readonly inboxCritical = this.inboxAlerts.criticalCount;
 
   protected readonly groups = computed(() =>
     NAV.map((g) => ({ ...g, items: g.items.filter((i) => this.auth.allows(i.access)) })).filter(
@@ -131,6 +146,7 @@ export class ShellComponent {
   protected readonly role = computed(() => humanize(this.auth.primaryRole()));
 
   constructor() {
+    this.inboxAlerts.start();
     this.router.events
       .pipe(
         filter((e) => e instanceof NavigationEnd),

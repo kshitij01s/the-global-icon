@@ -1,55 +1,38 @@
-# Final Verification Report — THE GLOBAL ICON
+# Verification — Admin API Inbox
 
-Date: 2026-11-04 (Platform integration + auth bridge)
+**Date:** 2026-11-07  
+**Feature:** Admin API Inbox (Integration Monitoring & Operations Error Management)
 
-## Run commands
+## Checklist
 
-```powershell
-$env:Path = "C:\Program Files\nodejs;C:\Program Files\Git\cmd;" + $env:Path
-cd "D:\Magazine Project"
+| Criterion | Status |
+|-----------|--------|
+| Prisma `ApiInboxItem` + additive migration | Done |
+| Nest module, report/dedupe/fingerprint | Done |
+| Admin list/alerts/detail/patch APIs + RBAC | Done |
+| DEV simulate endpoint (non-production) | Done |
+| Angular page, drawer, filters, actions | Done |
+| Sidebar badge + dashboard strip + 45s poll | Done |
+| Wired uploads, publish, pages, RSS, themes, ads | Done |
+| Global unexpected-error filter (no double-count) | Done |
+| Unit tests for normalize/fingerprint/classify | Done |
+| Permissions seeded (`api_inbox.view` / `manage`) | Done |
+| Existing features preserved (additive only) | Done |
+| Docs (`API_INBOX_*`) | Done |
 
-npm run dev:api     # http://localhost:4000
-npm run dev:web     # http://localhost:5173
-npm run dev:admin   # http://localhost:4200
-```
+## Acceptance tests (manual / API)
 
-Staff reset (local only):
+1. **First failure** — `simulate-failure` storage → one OPEN, `occurrenceCount=1`.
+2. **Duplicate** — same scenario again → same row, count=2, `lastSeenAt` updates.
+3. **Acknowledge** — PATCH status ACKNOWLEDGED → timestamps + actor.
+4. **Resolve** — PATCH RESOLVED with notes.
+5. **After resolve** — simulate again → new OPEN; prior RESOLVED preserved.
+6. **Customer security** — `html_upstream` scenario → technical redacted in inbox; response customer-safe.
+7. **Permissions** — unauthenticated → 401; reader → 403; Admin/Super Admin → OK.
+8. **Badges** — open/critical counts update; resolved no longer counted open.
 
-```powershell
-cd apps\api
-node scripts\reset-staff-users.js
-# Credentials → apps/api/.superadmin-local.txt (gitignored)
-```
+## Known limitations
 
-## Auth bridge (verified)
-
-1. Public Sign In at `:5173/signin` with Super Admin credentials.
-2. Redirect to `:4200/` Admin dashboard (“Welcome back, Super Admin”).
-3. Cookie refresh adopted by Angular `AuthService.initialize()`.
-4. Login API + refresh cookie + RSS XML validated via Node fetch.
-
-## UI fixes verified
-
-- Compact header / hamburger below `2xl`; Magazines mega includes Editions.
-- Light/Dark/System re-applies brand tokens.
-- RSS feed `application/rss+xml` + HTML alternate link.
-- `overflow-x: clip` on document root.
-
-## Tests
-
-- API Jest: run `npm run test -w @tgi/api`
-- Manual browser: staff redirect path confirmed.
-
-## Docs
-
-- `docs/PLATFORM_INTEGRATION_AND_BUG_FIX_PLAN.md`
-- `docs/AUTHENTICATION_AND_ROLE_ACCESS.md`
-- `docs/LOCAL_DEVELOPMENT_SETUP.md`
-- `docs/UI_BUG_FIX_REPORT.md`
-
-## Remaining limitations
-
-- Access JWT still in Angular `localStorage` (httpOnly refresh is the durable credential).
-- No one-time handoff code endpoint (cookie bridge is sufficient for localhost).
-- Forgot-password is contact-flow only (no email reset yet).
-- Lunar festival dates still need yearly admin verification.
+- Operational email is logged + cooldown-stamped until a mail provider is configured.
+- Occurrence “history” is count-based (no separate occurrence child table).
+- Alert freshness is polling-based (45s), not WebSocket.
