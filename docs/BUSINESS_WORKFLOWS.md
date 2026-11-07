@@ -21,12 +21,12 @@ Statuses: Draft · In Review · Changes Requested · Approved · Archived · Pub
 - Magazines may reference `editionSeries`.
 - There is **no** separate Edition create/publish entity. Treat Year Archive as the edition browser.
 
-## 3. Stories and Leaders — Working
+## 3. Stories and Leaders — Partially Working
 
-1. Create/edit in Admin Stories or Leaders.
-2. Attach metadata / images as supported by forms.
-3. Draft → publish (articles status / leaders `isPublished`).
-4. Public website consumes published content.
+1. Admin **Stories** / **Leaders** list, search, publish/unpublish, and delete.
+2. Nest APIs support full create/update (`POST`/`PATCH`), but Angular **create/edit forms are not built yet**.
+3. Published content appears on the public site once records exist (e.g. seeded or created via API).
+4. Closing the gap: add Admin forms wired to existing `createArticle` / `createLeader` client methods.
 
 ## 4. Advertising campaign — Partially Working
 

@@ -20,8 +20,8 @@ Auth: shared JWT access token + httpOnly refresh cookie. RBAC via `PERMISSIONS` 
 | Dashboard overview | `/` | `GET /admin/dashboard` | Aggregates | Live counts — not hardcoded |
 | Magazines | `/magazines`, `/magazines/new`, edit | Admin magazines CRUD + publish | `Magazine` | PDF upload via `/admin/uploads` |
 | Editions | `/editions` | Same magazine list (year mode) | `editionSeries` on Magazine | Not a separate Edition CRUD entity |
-| Stories | `/articles` | Admin articles | `Article` | Draft / review / publish |
-| Leaders | `/leaders` | Admin leaders | `Leader` | |
+| Stories | `/articles` | Admin articles (full CRUD API) | `Article` | UI: list + publish/delete only |
+| Leaders | `/leaders` | Admin leaders (full CRUD API) | `Leader` | UI: list + publish/delete only |
 | CMS pages | `/pages/:slug` | `/admin/pages` | `ManagedPage` | Draft / publish / restore |
 | Announcements | `/announcements` | `/admin/announcements` | Announcement model | |
 | Advertising | `/ads` | list + report | `Advertisement`, events | Analytics aggregates; limited create UI |
@@ -53,10 +53,16 @@ Previously: mixed “Magazine Management / Stories / Advertising / Website / App
 
 1. **Invoices / payments** — not in schema or API (documented, not faked).
 2. **Edition entity** — editions are year/archive views + `editionSeries`, not independent edition records.
-3. **Ad campaign create/edit UI** — list + analytics report primarily; full package builder not present.
-4. **Audit log browser** — backend audit exists; no admin list UI.
-5. **RSS admin** — feed is generated; no feed config screen.
-6. **Background job monitor** — no dedicated worker UI (theme scheduler runs in request path / DB schedules).
+3. **Stories / Leaders create-edit UI** — APIs exist; Admin screens are list/action only.
+4. **Ad campaign write path** — GET list + analytics only; no POST/PATCH admin API.
+5. **Users role editor / enquiry assign** — APIs exist; not exposed in Angular.
+6. **CMS publish** — `pages.publish` withheld from default ADMIN role (Super Admin publishes).
+7. **Site settings** — featured article/magazine fields and homepage sections/partners lack UI.
+8. **Audit log browser** — backend audit exists; no admin list UI (`audit.view` unused).
+9. **RSS admin** — feed is generated; no feed config screen.
+10. **Background job monitor** — no dedicated worker UI (theme scheduler is resolve-time / DB schedules).
+
+Detailed route/controller/permission tables were cross-checked in a dedicated platform audit pass (2026-11-07).
 
 ## Duplicate / broken findings
 
