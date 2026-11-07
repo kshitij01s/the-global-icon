@@ -1,38 +1,37 @@
-# Verification — Admin API Inbox
+# Verification Final — Unified Startup & Dashboard Workflows
 
 **Date:** 2026-11-07  
-**Feature:** Admin API Inbox (Integration Monitoring & Operations Error Management)
+**Commit target:** unified `npm run dev` + integrated admin navigation/workflows
 
-## Checklist
+## Completed
 
-| Criterion | Status |
-|-----------|--------|
-| Prisma `ApiInboxItem` + additive migration | Done |
-| Nest module, report/dedupe/fingerprint | Done |
-| Admin list/alerts/detail/patch APIs + RBAC | Done |
-| DEV simulate endpoint (non-production) | Done |
-| Angular page, drawer, filters, actions | Done |
-| Sidebar badge + dashboard strip + 45s poll | Done |
-| Wired uploads, publish, pages, RSS, themes, ads | Done |
-| Global unexpected-error filter (no double-count) | Done |
-| Unit tests for normalize/fingerprint/classify | Done |
-| Permissions seeded (`api_inbox.view` / `manage`) | Done |
-| Existing features preserved (additive only) | Done |
-| Docs (`API_INBOX_*`) | Done |
+| Item | Result |
+|------|--------|
+| Root `npm run dev` via `concurrently -k` | Added; labels API/WEB/ADMIN |
+| Individual `dev:api` / `dev:web` / `dev:admin` preserved | Yes |
+| README + LOCAL_DEVELOPMENT_SETUP updated | Yes |
+| Workflow audit + matrix + business docs | Yes |
+| Admin sidebar regrouped (Content / Website / Ads / Finance / Ops / Themes / Access) | Yes |
+| Collapsible nav, breadcrumbs, account strip | Yes |
+| Dashboard live stats + workflow shortcuts + API Inbox card | Yes |
+| Finance/Invoices honest Not Implemented page | Yes |
+| No DB reset / no secret commit | Yes |
+| Existing features preserved | Yes |
 
-## Acceptance tests (manual / API)
+## Honest gaps (unchanged)
 
-1. **First failure** — `simulate-failure` storage → one OPEN, `occurrenceCount=1`.
-2. **Duplicate** — same scenario again → same row, count=2, `lastSeenAt` updates.
-3. **Acknowledge** — PATCH status ACKNOWLEDGED → timestamps + actor.
-4. **Resolve** — PATCH RESOLVED with notes.
-5. **After resolve** — simulate again → new OPEN; prior RESOLVED preserved.
-6. **Customer security** — `html_upstream` scenario → technical redacted in inbox; response customer-safe.
-7. **Permissions** — unauthenticated → 401; reader → 403; Admin/Super Admin → OK.
-8. **Badges** — open/critical counts update; resolved no longer counted open.
+- Invoice/payment backend: **Not Implemented**
+- Full ad campaign builder: **Partial**
+- Audit log UI: **Not Implemented**
+- Separate Edition CRUD: **Partial** (year archive)
 
-## Known limitations
+## How to verify locally
 
-- Operational email is logged + cooldown-stamped until a mail provider is configured.
-- Occurrence “history” is count-based (no separate occurrence child table).
-- Alert freshness is polling-based (45s), not WebSocket.
+```powershell
+cd "D:\Magazine Project"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+. .\scripts\use-node.ps1
+npm run dev
+```
+
+Open http://localhost:4200 → confirm sectioned sidebar → Dashboard stats load from API → Magazines / CMS / Themes / API Inbox reachable per role.

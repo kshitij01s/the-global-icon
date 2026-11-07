@@ -15,14 +15,21 @@ interface StatCard {
   tone?: 'gold' | 'warn';
 }
 
+interface WorkflowLink {
+  title: string;
+  blurb: string;
+  path: string;
+  perm: string;
+}
+
 @Component({
   selector: 'app-dashboard',
   imports: [DatePipe, RouterLink],
   template: `
     <header class="page-head">
       <div>
-        <h1>Dashboard</h1>
-        <p class="muted">Welcome back, {{ auth.displayName() }}.</p>
+        <h1>{{ heading() }}</h1>
+        <p class="muted">{{ subtitle() }}</p>
       </div>
       <button type="button" class="btn btn-ghost" (click)="load()" [disabled]="loading()">Refresh</button>
     </header>
@@ -64,6 +71,19 @@ interface StatCard {
         }
       </div>
 
+      <section class="panel pad mb">
+        <h2>Operational workflows</h2>
+        <p class="muted small mb-sm">Jump into the connected publishing and business paths available on this console.</p>
+        <div class="workflow-grid">
+          @for (w of workflows(); track w.path) {
+            <a class="workflow-card" [routerLink]="w.path">
+              <strong>{{ w.title }}</strong>
+              <span class="muted small">{{ w.blurb }}</span>
+            </a>
+          }
+        </div>
+      </section>
+
       <section class="panel">
         <div class="panel-head">
           <h2>Recent enquiries</h2>
@@ -90,8 +110,35 @@ interface StatCard {
               </tbody>
             </table>
           </div>
+          @if (auth.can('enquiries.view') || auth.can('enquiries.manage')) {
+            <div class="pad"><a routerLink="/enquiries">Open all enquiries →</a></div>
+          }
         }
       </section>
+    }
+  `,
+  styles: `
+    .mb { margin-bottom: 1rem; }
+    .mb-sm { margin-bottom: 12px; }
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+    }
+    .workflow-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #fbfbfd, #fff);
+      color: inherit;
+      text-decoration: none;
+    }
+    .workflow-card:hover {
+      border-color: #c9b48a;
+      text-decoration: none;
     }
   `,
 })
@@ -106,22 +153,105 @@ export class DashboardComponent {
   protected readonly error = signal<string | null>(null);
   protected readonly label = humanize;
 
+  protected readonly heading = computed(() =>
+    this.auth.hasRole('SUPER_ADMIN') ? 'Global Overview' : 'Dashboard',
+  );
+  protected readonly subtitle = computed(() =>
+    this.auth.hasRole('SUPER_ADMIN')
+      ? `Platform overview for ${this.auth.displayName()}. Live counts from PostgreSQL.`
+      : `Welcome back, ${this.auth.displayName()}. Live counts from the shared API.`,
+  );
+
   protected readonly cards = computed<StatCard[]>(() => {
     const s = this.stats();
     if (!s) return [];
     return [
-      { label: 'Magazines', value: s.magazines.total, hint: `${s.magazines.published} published · ${s.magazines.draft} draft`, link: { path: '/magazines', perm: 'magazines.read_admin' }, tone: 'gold' },
-      { label: 'Magazines in review', value: s.magazines.inReview, tone: 'warn' },
-      { label: 'Demo editions', value: s.magazines.demo, hint: 'Flagged as demo content' },
-      { label: 'Stories', value: s.articles.total, hint: `${s.articles.published} published`, link: { path: '/articles', perm: 'articles.update' } },
-      { label: 'Stories in review', value: s.articles.inReview, tone: 'warn' },
-      { label: 'Leaders', value: s.leaders.total, hint: `${s.leaders.published} published`, link: { path: '/leaders', perm: 'leaders.manage' } },
-      { label: 'Enquiries', value: s.enquiries.total, hint: `${s.enquiries.new} new`, link: { path: '/enquiries', perm: 'enquiries.view' } },
-      { label: 'New enquiries', value: s.enquiries.new, tone: 'warn' },
+      {
+        label: 'Magazines',
+        value: s.magazines.total,
+        hint: `${s.magazines.published} published · ${s.magazines.draft} draft`,
+        link: { path: '/magazines', perm: 'magazines.read_admin' },
+        tone: 'gold',
+      },
+      { label: 'Magazines in review', value: s.magazines.inReview, tone: 'warn', link: { path: '/magazines', perm: 'magazines.read_admin' } },
+      { label: 'Demo editions', value: s.magazines.demo, hint: 'Flagged as demo content', link: { path: '/editions', perm: 'magazines.read_admin' } },
+      {
+        label: 'Stories',
+        value: s.articles.total,
+        hint: `${s.articles.published} published`,
+        link: { path: '/articles', perm: 'articles.read_admin' },
+      },
+      { label: 'Stories in review', value: s.articles.inReview, tone: 'warn', link: { path: '/articles', perm: 'articles.read_admin' } },
+      {
+        label: 'Leaders',
+        value: s.leaders.total,
+        hint: `${s.leaders.published} published`,
+        link: { path: '/leaders', perm: 'leaders.manage' },
+      },
+      {
+        label: 'Enquiries',
+        value: s.enquiries.total,
+        hint: `${s.enquiries.new} new`,
+        link: { path: '/enquiries', perm: 'enquiries.view' },
+      },
+      { label: 'New enquiries', value: s.enquiries.new, tone: 'warn', link: { path: '/enquiries', perm: 'enquiries.view' } },
       { label: 'Users', value: s.users.total, link: { path: '/users', perm: 'users.manage' } },
       { label: 'Newsletter subscribers', value: s.newsletter.activeSubscribers, hint: 'Active' },
-      { label: 'Active advertisements', value: s.advertisements.active },
+      {
+        label: 'Active advertisements',
+        value: s.advertisements.active,
+        link: { path: '/ads', perm: 'ads.manage' },
+      },
+      {
+        label: 'Open API issues',
+        value: this.inbox.openCount(),
+        hint: this.inbox.criticalCount() > 0 ? `${this.inbox.criticalCount()} critical` : 'Operational inbox',
+        link: { path: '/api-inbox', perm: 'api_inbox.view' },
+        tone: this.inbox.criticalCount() > 0 ? 'warn' : undefined,
+      },
     ];
+  });
+
+  protected readonly workflows = computed<WorkflowLink[]>(() => {
+    const all: WorkflowLink[] = [
+      {
+        title: 'Publish a magazine',
+        blurb: 'Create → upload PDF → review → publish to the public site',
+        path: '/magazines/new',
+        perm: 'magazines.create',
+      },
+      {
+        title: 'Edit website pages',
+        blurb: 'CMS draft → publish → React site updates',
+        path: '/pages/home',
+        perm: 'pages.view',
+      },
+      {
+        title: 'Manage stories',
+        blurb: 'Draft, review, and publish editorial stories',
+        path: '/articles',
+        perm: 'articles.read_admin',
+      },
+      {
+        title: 'Advertising pipeline',
+        blurb: 'Enquiries → campaigns → performance report',
+        path: '/enquiries',
+        perm: 'enquiries.view',
+      },
+      {
+        title: 'Festival themes',
+        blurb: 'Studio → schedule → public activation',
+        path: '/theme-studio',
+        perm: 'themes.view',
+      },
+      {
+        title: 'API Inbox',
+        blurb: 'Acknowledge and resolve integration failures',
+        path: '/api-inbox',
+        perm: 'api_inbox.view',
+      },
+    ];
+    return all.filter((w) => this.auth.can(w.perm));
   });
 
   constructor() {
@@ -141,5 +271,6 @@ export class DashboardComponent {
         this.loading.set(false);
       },
     });
+    this.inbox.refresh();
   }
 }

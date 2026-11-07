@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "the-global-icon",
   "private": true,
   "version": "0.1.0",
@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "concurrently -k -n API,WEB,ADMIN -c cyan,green,magenta \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:admin\"",
     "dev:api": "npm run start:dev -w @tgi/api",
     "dev:web": "npm run dev -w @tgi/public-web",
     "dev:admin": "npm run start -w @tgi/admin-dashboard",
@@ -17,6 +18,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
   }
 }
-

@@ -134,6 +134,14 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/api-inbox.component').then((m) => m.ApiInboxComponent),
       },
       {
+        path: 'finance/invoices',
+        title: 'Invoices · TGI Admin',
+        canActivate: [accessGuard],
+        data: { access: ACCESS.dashboard },
+        loadComponent: () =>
+          import('./pages/finance-invoices.component').then((m) => m.FinanceInvoicesComponent),
+      },
+      {
         path: 'forbidden',
         title: 'No access · TGI Admin',
         loadComponent: () => import('./pages/forbidden.component').then((m) => m.ForbiddenComponent),

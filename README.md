@@ -33,27 +33,43 @@ Modern apps live under `apps/`. Dual-stack notes: [README-MODERN.md](README-MODE
 
 ## Local development (modern stack)
 
-**Requirements:** Node.js 20+, PostgreSQL 16+
+**Requirements:** Node.js 20+ (see `engines` in root `package.json`), PostgreSQL 16+, PowerShell on Windows.
+
+### One-command startup (recommended)
 
 ```powershell
-$env:Path = "C:\Program Files\nodejs;C:\Program Files\Git\cmd;" + $env:Path
 cd "D:\Magazine Project"
-
-Copy-Item apps\api\.env.example apps\api\.env
-# Edit apps/api/.env — set DATABASE_URL and JWT secrets (placeholders only in the example)
-
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+. .\scripts\use-node.ps1
 npm install
-cd apps\api
-npx prisma migrate deploy
-npx prisma db seed
-cd ..\..
-
-npm run dev:api     # http://localhost:4000  (Swagger: /docs)
-npm run dev:web     # http://localhost:5173
-npm run dev:admin   # http://localhost:4200
+# First time only — copy env, migrate, seed (never commit secrets):
+# Copy-Item apps\api\.env.example apps\api\.env
+# npm run db:migrate
+# npm run db:seed
+npm run dev
 ```
 
-Staff login from the public site redirects Admin / Super Admin to the Angular console. Shared auth details: [docs/AUTHENTICATION_AND_ROLE_ACCESS.md](docs/AUTHENTICATION_AND_ROLE_ACCESS.md) · [docs/LOCAL_DEVELOPMENT_SETUP.md](docs/LOCAL_DEVELOPMENT_SETUP.md).
+`npm run dev` runs API, React, and Angular together via `concurrently` (`-k` kills all on Ctrl+C). Labels: **API**, **WEB**, **ADMIN**.
+
+| Service | URL |
+|---------|-----|
+| Backend API | http://localhost:4000 (Swagger `/docs`) |
+| Public website | http://localhost:5173 |
+| Admin dashboard | http://localhost:4200 |
+
+### Individual services (still supported)
+
+```powershell
+npm run dev:api     # NestJS
+npm run dev:web     # React
+npm run dev:admin   # Angular
+```
+
+### Stop
+
+Press **Ctrl+C** in the terminal running `npm run dev`. Concurrently stops child processes (`-k`).
+
+Staff login from the public site redirects Admin / Super Admin to the Angular console. Shared auth: [docs/AUTHENTICATION_AND_ROLE_ACCESS.md](docs/AUTHENTICATION_AND_ROLE_ACCESS.md) · [docs/LOCAL_DEVELOPMENT_SETUP.md](docs/LOCAL_DEVELOPMENT_SETUP.md).
 
 Reset local staff accounts (writes gitignored credentials file):
 
@@ -105,6 +121,11 @@ Admin: `http://localhost:4200/theme-studio`
 
 | Doc | Topic |
 |-----|--------|
+| [docs/LOCAL_DEVELOPMENT_SETUP.md](docs/LOCAL_DEVELOPMENT_SETUP.md) | Local env & troubleshooting |
+| [docs/PROJECT_WORKFLOW_AUDIT.md](docs/PROJECT_WORKFLOW_AUDIT.md) | Module audit |
+| [docs/DASHBOARD_STRUCTURE.md](docs/DASHBOARD_STRUCTURE.md) | Admin nav structure |
+| [docs/MODULE_INTEGRATION_MATRIX.md](docs/MODULE_INTEGRATION_MATRIX.md) | Integration status matrix |
+| [docs/BUSINESS_WORKFLOWS.md](docs/BUSINESS_WORKFLOWS.md) | End-to-end workflows |
 | [docs/THEME_SYSTEM.md](docs/THEME_SYSTEM.md) | Theme priority & APIs |
 | [docs/VERIFICATION_FINAL.md](docs/VERIFICATION_FINAL.md) | Latest verification |
 | [docs/API.md](docs/API.md) | API overview |
