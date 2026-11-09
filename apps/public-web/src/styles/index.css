@@ -1085,3 +1085,54 @@
 body[data-reader-active='1'] .festival-layer {
   display: none;
 }
+
+/* —— Content protection (CIO Today–style deterrents) —— */
+html.tgi-content-protected,
+html.tgi-content-protected body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html.tgi-content-protected input,
+html.tgi-content-protected textarea,
+html.tgi-content-protected select,
+html.tgi-content-protected [contenteditable='true'],
+html.tgi-content-protected .allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+html.tgi-content-protected img,
+html.tgi-content-protected canvas.reader-canvas {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: auto;
+}
+@media print {
+  html.tgi-content-protected body * {
+    visibility: hidden !important;
+  }
+  html.tgi-content-protected body::after {
+    content: 'Printing is disabled for protected THE GLOBAL ICON content.';
+    visibility: visible;
+    display: block;
+    padding: 2rem;
+    font-family: Georgia, serif;
+  }
+}
+.tgi-protect-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  z-index: 10000;
+  max-width: min(92vw, 28rem);
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  background: rgba(20, 28, 46, 0.94);
+  color: #f4ecdc;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}

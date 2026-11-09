@@ -44,15 +44,26 @@ npm run dev:admin    # :4200 Angular
 
 ### Production checklist
 
-- [ ] Strong secrets; `NODE_ENV=production`
+- [ ] Strong secrets; `NODE_ENV=production` (JWT secrets ≥ 32 chars, not `change-me-*`)
 - [ ] Managed PostgreSQL with backups
-- [ ] Object storage adapter for private PDFs (replace local `STORAGE_ROOT`)
-- [ ] TLS termination + secure cookies
-- [ ] Restrict CORS to real origins
-- [ ] Rotate bootstrap Super Admin password
-- [ ] Run API + web + admin builds in CI
-- [ ] Verify five demo PDFs open through authorized API
+- [ ] Object storage / durable `STORAGE_ROOT` for private PDFs
+- [ ] TLS termination + secure cookies (`secure` flag when `NODE_ENV=production`)
+- [ ] Restrict `CORS_ORIGINS` to real HTTPS public + admin origins (required in production)
+- [ ] Rotate bootstrap Super Admin password; unset bootstrap env after first seed if desired
+- [ ] Swagger `/docs` is auto-disabled in production
+- [ ] Content protection enabled on public web (see `docs/CONTENT_PROTECTION.md`)
+- [ ] Run `npm run predeploy:check` (tests + all builds)
+- [ ] Verify magazine PDFs open through authorized API only
 - [ ] Keep Django offline but backed up for one release cycle
+
+### Pre-deploy command
+
+```powershell
+cd "D:\Magazine Project"
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+. .\scripts\use-node.ps1
+npm run predeploy:check
+```
 
 ### Builds
 

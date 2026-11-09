@@ -16,17 +16,23 @@ async function bootstrap(): Promise<void> {
 
   if (isProduction) app.set('trust proxy', 1);
 
-  // Security headers. Swagger UI needs inline scripts, so relax CSP for /docs only.
+  // Security headers. Swagger UI needs inline scripts, so relax CSP for /docs only (dev).
   const strictHelmet = helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    referrerPolicy: { policy: 'no-referrer' },
+    // Frame-busting for API JSON responses; media CORS still uses CORP cross-origin above.
+    xFrameOptions: { action: 'deny' },
   });
   const docsHelmet = helmet({
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   });
-  app.use((req: Request, res: Response, next: NextFunction) =>
-    req.path.startsWith('/docs') ? docsHelmet(req, res, next) : strictHelmet(req, res, next),
-  );
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (!isProduction && req.path.startsWith('/docs')) {
+      return docsHelmet(req, res, next);
+    }
+    return strictHelmet(req, res, next);
+  });
 
   app.use(cookieParser());
 
@@ -34,6 +40,9 @@ async function bootstrap(): Promise<void> {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+  if (isProduction && origins.length === 0) {
+    throw new Error('CORS_ORIGINS must be set in production');
+  }
   app.enableCors({
     origin: origins,
     credentials: true,
@@ -52,18 +61,23 @@ async function bootstrap(): Promise<void> {
   );
   app.enableShutdownHooks();
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('THE GLOBAL ICON API')
-    .setDescription('Stories That Shape Tomorrow. — public and admin API')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, swaggerConfig));
+  // Swagger is a development surface — keep it off in production builds.
+  if (!isProduction) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('THE GLOBAL ICON API')
+      .setDescription('Stories That Shape Tomorrow. — public and admin API')
+      .setVersion('0.1.0')
+      .addBearerAuth()
+      .build();
+    SwaggerModule.setup('docs', app, SwaggerModule.createDocument(app, swaggerConfig));
+  }
 
   const port = Number(config.get<string>('PORT') ?? 4000);
   await app.listen(port);
   new Logger('Bootstrap').log(
-    `API listening on http://localhost:${port}/${API_PREFIX} — docs at /docs`,
+    isProduction
+      ? `API listening on port ${port}/${API_PREFIX} (production)`
+      : `API listening on http://localhost:${port}/${API_PREFIX} — docs at /docs`,
   );
 }
 

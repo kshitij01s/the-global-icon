@@ -1,6 +1,7 @@
 import { MotionConfig } from 'framer-motion'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import ContentProtection from './components/ContentProtection'
 import Layout from './components/Layout'
 import { Loading } from './components/ui'
 import { AuthProvider } from './lib/auth'
@@ -46,6 +47,7 @@ export default function App() {
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
+            <ContentProtection />
             <Suspense fallback={<Loading />}>
               <Routes>
                 <Route path="lab/motion" element={<MotionLab />} />

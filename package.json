@@ -14,7 +14,8 @@
     "build": "npm run build -w @tgi/api -w @tgi/public-web -w @tgi/admin-dashboard",
     "test": "npm run test -w @tgi/api --if-present && npm run test -w @tgi/public-web --if-present",
     "db:migrate": "npm run prisma:migrate -w @tgi/api",
-    "db:seed": "npm run prisma:seed -w @tgi/api"
+    "db:seed": "npm run prisma:seed -w @tgi/api",
+    "predeploy:check": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/predeploy-check.ps1"
   },
   "engines": {
     "node": ">=20"

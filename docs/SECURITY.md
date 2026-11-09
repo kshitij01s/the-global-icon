@@ -24,6 +24,13 @@
 ## Operational
 
 - Helmet, validation pipe, throttling enabled.
+- Production: Swagger disabled; CORS must be configured; referrer / frame headers tightened.
 - CORS limited to configured origins.
 - No secrets in git (`.env`, `.superadmin-local.txt` ignored).
 - Django legacy app remains until cutover; do not expose both admin surfaces in production without a clear cutover plan.
+
+## Public content deterrents
+
+- Client-side copy / right-click / drag / DevTools shortcut deterrents on the React site (CIO Today–comparable UX).
+- Does **not** replace server auth; screenshots cannot be fully blocked by any website.
+- Details: [CONTENT_PROTECTION.md](CONTENT_PROTECTION.md).
