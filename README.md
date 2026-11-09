@@ -121,6 +121,7 @@ Admin: `http://localhost:4200/theme-studio`
 
 | Doc | Topic |
 |-----|--------|
+| [docs/CURSOR_FRONTEND_AND_GATEWAY_SETUP.md](docs/CURSOR_FRONTEND_AND_GATEWAY_SETUP.md) | Cursor UI/UX skill, motion/3D lab, Free LLM gateway notes |
 | [docs/LOCAL_DEVELOPMENT_SETUP.md](docs/LOCAL_DEVELOPMENT_SETUP.md) | Local env & troubleshooting |
 | [docs/PROJECT_WORKFLOW_AUDIT.md](docs/PROJECT_WORKFLOW_AUDIT.md) | Module audit |
 | [docs/DASHBOARD_STRUCTURE.md](docs/DASHBOARD_STRUCTURE.md) | Admin nav structure |

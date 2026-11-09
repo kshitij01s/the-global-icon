@@ -20,6 +20,9 @@ import SignIn from './pages/SignIn'
 import { StoriesList, StoryDetail } from './pages/Stories'
 
 const Reader = lazy(() => import('./pages/Reader'))
+const MotionLab = lazy(() =>
+  import('./experience/MotionLab').then((m) => ({ default: m.MotionLab })),
+)
 
 function NotFound() {
   useDocumentTitle('Page not found')
@@ -45,6 +48,7 @@ export default function App() {
           <AuthProvider>
             <Suspense fallback={<Loading />}>
               <Routes>
+                <Route path="lab/motion" element={<MotionLab />} />
                 <Route element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="editions" element={<Editions />} />

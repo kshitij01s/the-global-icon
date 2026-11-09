@@ -1,0 +1,19 @@
+---
+description: THE GLOBAL ICON generative frontend, motion, and UI UX Pro Max usage
+globs: apps/public-web/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# TGI generative frontend (Cursor)
+
+When designing or animating the public React site:
+
+1. **Activate design intelligence** — read and follow `.cursor/skills/ui-ux-pro-max/SKILL.md`. Search offline catalogs (styles / colors / typography / stacks) before inventing a new look.
+2. **Preserve brand** — THE GLOBAL ICON is premium editorial (navy/charcoal + gold). Do not replace the live brand with generic AI-purple or random pink CTAs from catalog suggestions unless the product owner asks for a redesign.
+3. **Motion stack**
+   - Primary pages: existing **Framer Motion** patterns.
+   - Scroll storytelling / chapter reveals: **GSAP** + `ScrollTrigger` via `apps/public-web/src/lib/motion.ts`.
+   - Immersive / 3D moments: **React Three Fiber** + Drei, preferably isolated routes (e.g. `/lab/motion`) or lazy islands — not on every page by default.
+4. **Accessibility** — honor `prefers-reduced-motion`; keep DOM reading order intact; pause off-screen scroll animations.
+5. **Security** — never expose tokens, JWT secrets, or admin APIs in the public bundle. Public users must not reach admin routes.
+6. **Do not** reset databases, replace Nest/Angular stacks, or break magazine/CMS publishing while experimenting with generative UI.
